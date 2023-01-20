@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+
+  <style>
+    div {
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    div #link {
+      border-radius: 20px;
+      font-size: 0;
+      width: 200px;
+      height: 100px;
+      background-image: url(./button.svg);
+    }
+  </style>
+</head>
+<body>
+  <div>
+    <a id="link">autoClickSteamGiveaways</a>
+  </div>
+
+  <script>
+    const aEl = document.getElementById('link');
+
+    aEl.href = `javascript:var s = document.createElement('script');s.type='text/javascript';document.body.appendChild(s);s.src='${location.href}/steamgift.js';void(0);`;
+  </script>
+</body>
+</html>
