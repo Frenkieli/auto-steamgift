@@ -1,0 +1,29 @@
+{
+  "restricted": {
+    "trigger": true,
+    "value": 100
+  },
+  "whitelist": {
+    "trigger": true,
+    "value": 50
+  },
+  "group": {
+    "trigger": true,
+    "value": 50
+  },
+  "level": {
+    "trigger": true,
+    "value": 20
+  },
+  "cost": {
+    "trigger": true,
+    "value": 1
+  },
+  "autoScore": {
+    "trigger": true
+  },
+  "autoStart": {
+    "trigger": false
+  },
+  "totalEnterGiveaway": 0
+}

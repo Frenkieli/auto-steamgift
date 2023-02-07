@@ -1,0 +1,30 @@
+{
+  "extName": {
+    "message": "Auto Enter Steam Giveaway",
+    "description": "extensions name"
+  },
+  "extDescription": {
+    "message": "automatic enter steam giveaway!",
+    "description": "extensions description"
+  },
+  "formRestricted": {
+    "message": "Restricted",
+    "description": "popup.html form SteamGift Restricted"
+  },
+  "formWhitelist": {
+    "message": "Whitelist",
+    "description": "popup.html form SteamGift Whitelist"
+  },
+  "formGroup": {
+    "message": "Group",
+    "description": "popup.html form SteamGift Group"
+  },
+  "formLevel": {
+    "message": "Level",
+    "description": "popup.html form SteamGift Level"
+  },
+  "formCost": {
+    "message": "Cost",
+    "description": "popup.html form SteamGift Cost"
+  }
+}

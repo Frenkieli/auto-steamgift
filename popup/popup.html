@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>__MSG_extName__-__MSG_popTitle__</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <h1>
+    __MSG_popTitle__
+  </h1>
+  <h2>__MSG_popTotal__: <span id="totalSpan"></span></h2>
+  <form>
+    <div>
+      <span>__MSG_formRestricted__</span>
+      <input id="form-restrictedCheckBox" name="formRestrictedCheckBox" type="checkbox" />
+      <input id="form-restrictedScore" name="formRestrictedScore" type="number" min="0" step="1" />
+    </div>
+    <div>
+      <span>__MSG_formWhitelist__</span>
+      <input id="form-whitelistCheckBox" name="formWhitelistCheckBox" type="checkbox" />
+      <input id="form-whitelistScore" name="formWhitelistScore" type="number" min="0" step="1" />
+    </div>
+    <div>
+      <span>__MSG_formGroup__</span>
+      <input id="form-groupCheckBox" name="formGroupCheckBox" type="checkbox" />
+      <input id="form-groupScore" name="formGroupScore" type="number" min="0" step="1" />
+    </div>
+    <div>
+      <span>__MSG_formLevel__</span>
+      <input id="form-levelCheckBox" name="formLevelCheckBox" type="checkbox" />
+      <input id="form-levelScore" name="formLevelScore" type="number" min="0" step="1" />
+    </div>
+    <div>
+      <span>__MSG_formCost__</span>
+      <input id="form-costCheckBox" name="formCostCheckBox" type="checkbox" />
+      <input id="form-costScore" name="formCostScore" type="number" min="0" step="1" />
+    </div>
+    <div>
+      <span>__MSG_formAutoScore__</span>
+      <input id="form-autoScoreCheckBox" name="formAutoScoreCheckBox" type="checkbox" />
+    </div>
+    <div>
+      <span>__MSG_formAutoStart__</span>
+      <input id="form-autoStartCheckBox" name="formAutoStartCheckBox" type="checkbox" />
+    </div>
+    <div>
+      <a id="popLinkOptions" href="#">__MSG_popLinkOptions__</a> <button type="submit">__MSG_popSubmit__</button>
+    </div>
+  </form>
+  <script src="init.js"></script>
+  <script src="popup.js"></script>
+</body>
+</html>

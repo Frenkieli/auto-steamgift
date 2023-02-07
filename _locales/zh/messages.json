@@ -1,0 +1,58 @@
+{
+  "extName": {
+    "message": "自動抽取 SteamGift",
+    "description": "extensions 名稱"
+  },
+  "extDescription": {
+    "message": "依照設定好的分數權重依序抽取 SteamGift 禮物",
+    "description": "extensions 描述"
+  },
+  "popTitle": {
+    "message": "簡易設定",
+    "description": "popup.html 的 title"
+  },
+  "popTotal": {
+    "message": "累計抽取",
+    "description": "popup.html 的累計抽獎文字"
+  },
+  "popLinkOptions": {
+    "message": "進入設定頁",
+    "description": "popup.html 連到 options 連結的文字"
+  },
+  "popSubmit": {
+    "message": "保存",
+    "description": "popup.html 連到 submit 文字"
+  },
+  "popStart": {
+    "message": "抽獎",
+    "description": "popup.html 開始抽獎文字"
+  },
+  "formRestricted": {
+    "message": "地區",
+    "description": "popup.html 的表單 SteamGift 關於地區"
+  },
+  "formWhitelist": {
+    "message": "白名單",
+    "description": "popup.html 的表單 SteamGift 關於白名單"
+  },
+  "formGroup": {
+    "message": "團體",
+    "description": "popup.html 的表單 SteamGift 關於團體"
+  },
+  "formLevel": {
+    "message": "等級",
+    "description": "popup.html 的表單 SteamGift 關於等級"
+  },
+  "formCost": {
+    "message": "花費",
+    "description": "popup.html 的表單 SteamGift 關於花費"
+  },
+  "formAutoScore": {
+    "message": "自動計算禮物分數",
+    "description": "popup.html 的表單 SteamGift 關於是否自動計算禮物分數"
+  },
+  "formAutoStart": {
+    "message": "自動開始抽禮物",
+    "description": "popup.html 的表單 SteamGift 關於是否自動開始抽禮物"
+  }
+}
