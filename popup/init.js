@@ -1,5 +1,5 @@
 // replace all html i18n variable
-var allTextNodes = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT),
+var allTextNodes = document.createTreeWalker(document.querySelector('html'), NodeFilter.SHOW_TEXT),
     tmpTxt,
     tmpNode;
 

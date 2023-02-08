@@ -8,25 +8,27 @@
   },
   "options_page": "options/options.html",
   "icons": {
-    "16": "icons/icon.png"
-
+    "16": "icons/icon-16.png",
+    "32": "icons/icon-32.png",
+    "48": "icons/icon-48.png",
+    "128": "icons/icon-128.png"
   },
   "permissions": [
     "storage",
     "activeTab",
     "scripting",
-    "tabs"
+    "tabs",
+    "notifications"
   ],
   "storage": {
     "managed_schema": "schema.json"
   },
   "action": {
     "default_title": "__MSG_extName__",
-    "default_popup": "popup/popup.html",
-    "default_icon": "icons/icon.png"
+    "default_popup": "popup/popup.html"
   },
   "default_locale": "en",
   "host_permissions": [
-    "https://www.steamgifts.com/*"
+    "*://www.steamgifts.com/*"
   ]
 }
