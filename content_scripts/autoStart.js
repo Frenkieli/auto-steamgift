@@ -83,6 +83,14 @@ setTimeout(() => {
 
       checkGiftPageState(giftPageWindow, giftElement).then(() => {
         countEntryGift++;
+        chrome.runtime.sendMessage({type: "setBadgeText", text: String(countEntryGift)});
+        chrome.storage.sync.get(["totalEnterGiveaway"], function(config) {
+          const total = ((config.totalEnterGiveaway || 0) * 1) + 1;
+  
+          chrome.storage.sync.set({
+            totalEnterGiveaway: total
+          })
+        });
         giftCardUiChange({
           cardElement: giftElement,
           text: CARD_TEXT.Enter,
@@ -139,16 +147,6 @@ setTimeout(() => {
         top: 0,
         behavior: "smooth"
       })
-
-      chrome.storage.sync.get(["totalEnterGiveaway"], function(config) {
-        const total = ((config.totalEnterGiveaway || 0) * 1) + countEntryGift;
-
-        chrome.runtime.sendMessage({type: "setBadgeText", text: String(total)});
-
-        chrome.storage.sync.set({
-          totalEnterGiveaway: total
-        })
-      });
     }
   }
   // ^^^^^^^^^^^^ 用來判斷是否抽完所有禮物

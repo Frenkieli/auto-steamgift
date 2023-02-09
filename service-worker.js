@@ -53,7 +53,7 @@ chrome.storage.onChanged.addListener((changes, areaName) => {
     }
   }
 
-  if(areaName !== "totalEnterGiveaway") {
+  if(!(Object.keys(changes).length === 1 &&  changes.totalEnterGiveaway)) {
     // 更新重整網站
     chrome.tabs.query({url: "https://www.steamgifts.com/*"}, function (tabs){
       tabs.forEach(tab => {

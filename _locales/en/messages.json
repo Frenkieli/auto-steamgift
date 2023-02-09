@@ -7,6 +7,26 @@
     "message": "automatic enter steam giveaway!",
     "description": "extensions description"
   },
+  "popTitle": {
+    "message": "Quickly Setting",
+    "description": "popup.html title"
+  },
+  "popTotal": {
+    "message": "Cumulative",
+    "description": "popup.html cumulative draw"
+  },
+  "popLinkOptions": {
+    "message": "Setting",
+    "description": "popup.html link to options page"
+  },
+  "popSubmit": {
+    "message": "Save",
+    "description": "popup.html submit text"
+  },
+  "popStart": {
+    "message": "Start",
+    "description": "popup.html Start"
+  },
   "formRestricted": {
     "message": "Restricted",
     "description": "popup.html form SteamGift Restricted"
@@ -26,5 +46,13 @@
   "formCost": {
     "message": "Cost",
     "description": "popup.html form SteamGift Cost"
+  },
+  "formAutoScore": {
+    "message": "Automation Scoring",
+    "description": "enter steamGiveaway page auto scoring"
+  },
+  "formAutoStart": {
+    "message": "Automation Enter Giveaway",
+    "description": "enter steamGiveaway page auto enter gift"
   }
 }
