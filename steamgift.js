@@ -31,7 +31,7 @@
     cardElement.parentNode.style.backgroundColor = bgColor;
   }
 
-  // 用來整理、排序和計算可以抽獎的禮物
+  // 用來整理、排序和計算可以加入的禮物
   const rowGiftElements = document.getElementsByClassName('giveaway__row-inner-wrap');
   const giftElements = [];
   let countEntryGift = 0;
@@ -86,7 +86,7 @@
       return false;
     }
   })
-  // ^^^^^^^^^^^^ 用來整理、排序和計算可以抽獎的禮物
+  // ^^^^^^^^^^^^ 用來整理、排序和計算可以加入的禮物
 
   // 用來將以抽取篩選好的禮物
   function clickAvailableGift(giftElement) {
@@ -125,7 +125,7 @@
   }
   // ^^^^^^^^^^^^ 用來將以抽取篩選好的禮物
 
-  // 因為沒辦法確認抽獎到完成會多久所以需要定時檢查
+  // 因為沒辦法確認加入到完成會多久所以需要定時檢查
   let checkGiftPageStateTimer;
   function checkGiftPageState(pageWindow) {
     return new Promise((resolve, reject) => {
@@ -144,15 +144,15 @@
       }, 600);
     })
   }
-  // ^^^^^^^^^^^^ 因為沒辦法確認抽獎到完成會多久所以需要定時檢查
+  // ^^^^^^^^^^^^ 因為沒辦法確認加入到完成會多久所以需要定時檢查
 
-  // 建立一個 yield function 來慢慢執行每一個抽獎程序
+  // 建立一個 yield function 來慢慢執行每一個加入程序
   function* enterAvailableGift(readyToEnterGiftElements){
     for(let readyToEnterGiftElement of readyToEnterGiftElements) {
       yield clickAvailableGift(readyToEnterGiftElement);
     }
   }
-  // ^^^^^^^^^^^^ 建立一個 yield function 來慢慢執行每一個抽獎程序
+  // ^^^^^^^^^^^^ 建立一個 yield function 來慢慢執行每一個加入程序
 
   // 用來判斷是否抽完所有禮物
   function checkAvailableGiftDone(enterAvailableGiftYield) {

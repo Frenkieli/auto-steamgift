@@ -1,10 +1,10 @@
 {
   "extName": {
-    "message": "自動抽取 SteamGift",
+    "message": "SteamGifts 助手",
     "description": "extensions 名稱"
   },
   "extDescription": {
-    "message": "依照設定好的分數權重依序抽取 SteamGift 禮物",
+    "message": "依照每個只用者自定義的價值分數，自動加入清單",
     "description": "extensions 描述"
   },
   "popTitle": {
@@ -12,8 +12,8 @@
     "description": "popup.html 的 title"
   },
   "popTotal": {
-    "message": "累計抽取",
-    "description": "popup.html 的累計抽獎文字"
+    "message": "累計加入",
+    "description": "popup.html 的累計"
   },
   "popLinkOptions": {
     "message": "進入設定頁",
@@ -24,8 +24,8 @@
     "description": "popup.html 連到 submit 文字"
   },
   "popStart": {
-    "message": "抽獎",
-    "description": "popup.html 開始抽獎文字"
+    "message": "加入",
+    "description": "popup.html 開始加入文字"
   },
   "formRestricted": {
     "message": "地區",

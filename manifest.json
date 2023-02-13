@@ -15,7 +15,6 @@
   },
   "permissions": [
     "storage",
-    "activeTab",
     "scripting",
     "tabs",
     "notifications"
@@ -27,7 +26,7 @@
     "default_title": "__MSG_extName__",
     "default_popup": "popup/popup.html"
   },
-  "default_locale": "en",
+  "default_locale": "zh_TW",
   "host_permissions": [
     "*://www.steamgifts.com/*"
   ]

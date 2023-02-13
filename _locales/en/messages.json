@@ -1,10 +1,10 @@
 {
   "extName": {
-    "message": "Auto Enter Steam Giveaway",
+    "message": "SteamGifts Assistant",
     "description": "extensions name"
   },
   "extDescription": {
-    "message": "automatic enter steam giveaway!",
+    "message": "Automatically add to the list according to each user-defined value score",
     "description": "extensions description"
   },
   "popTitle": {
@@ -13,7 +13,7 @@
   },
   "popTotal": {
     "message": "Cumulative",
-    "description": "popup.html cumulative draw"
+    "description": "popup.html cumulative join number"
   },
   "popLinkOptions": {
     "message": "Setting",
@@ -53,6 +53,6 @@
   },
   "formAutoStart": {
     "message": "Automation Enter Giveaway",
-    "description": "enter steamGiveaway page auto enter gift"
+    "description": "enter steamGiveaway page auto join the gift to list"
   }
 }
