@@ -4,154 +4,93 @@ setTimeout(() => {
     Enter: '(Enter Giveaway)',
     Fail: '(Enter Giveaway Fail)',
     NotEnough: '(Not Enough Point)'
-  }
+  };
   const CARD_STATE = {
-    Success: {
-      textColor: 'green',
-      bgColor: '#0ff1',
-    },
-    Fail: {
-      textColor: 'red',
-      bgColor: '#f001',
-    }
-  }
+    Success: { textColor: 'green', bgColor: '#0ff1' },
+    Fail: { textColor: 'red', bgColor: '#f001' }
+  };
 
-  function giftCardUiChange({
-    cardElement,
-    text,
-    textColor,
-    bgColor,
-  }) {
+  function giftCardUiChange({ cardElement, text, textColor, bgColor }) {
     cardElement.querySelector('.giveaway__heading__name').innerHTML += ` <span style="color:${textColor};">${text}</span>`;
     cardElement.classList.add('is-faded');
     cardElement.parentNode.style.backgroundColor = bgColor;
   }
 
-  // 用來整理、排序和計算可以加入的禮物
-  const rowGiftElements = document.getElementsByClassName('giveaway__row-inner-wrap');
-  const giftElements = [];
+  const core = window.GiveawayCore;
+  const delay = (ms) => new Promise((r) => setTimeout(r, ms));
+
+  // 1) 收集可加入（未抽過、未鎖定）的禮物，依分數由高到低排序
+  const giftElements = [...document.getElementsByClassName('giveaway__row-inner-wrap')]
+    .filter((row) => core.isEnterable(row));
+
+  giftElements.sort((a, b) => core.getScore(b) - core.getScore(a));
+
+  // 2) 依目前點數篩選，點數不夠的標記後跳過
+  let myPoint = Number(document.querySelector('.nav__points').innerText);
   let countEntryGift = 0;
 
-  for(const rowGiftElement of rowGiftElements) {
-    if(!rowGiftElement.classList.contains('is-faded')){
-      giftElements.push(rowGiftElement);
-    }
-  }
-
-  // 依照每個禮物擁有的條件計算抽取禮遇的權重
-  function getWeight(element) {
-    return element.querySelector('span.auto_steam-score').innerText.replace(/[^0-9.]/g, '');
-  }
-
-  giftElements.sort((a, b) => (getWeight(b) - getWeight(a)));
-
-  let myPoint = Number(document.querySelector('.nav__points').innerText);
-
-  // 計算點數夠不夠用，不夠用的直接篩掉打上點數不構
-  let readyToEnterGiftElements = giftElements.filter(giftElement => {
-    let cost = giftElement.querySelectorAll('.giveaway__heading__thin:not(.score)')[giftElement.querySelectorAll('.giveaway__heading__thin:not(.score)').length - 1].innerText.replace(/[^0-9]/g, '');
-    
-    if(myPoint >= cost) {
-      myPoint = myPoint - cost;
-
+  const readyToEnterGiftElements = giftElements.filter((row) => {
+    const cost = core.parsePointCost(row) || 0;
+    if (myPoint >= cost) {
+      myPoint -= cost;
       return true;
-    } else {
-      giftCardUiChange({
-        cardElement: giftElement,
-        text: CARD_TEXT.NotEnough,
-        ...CARD_STATE.Fail
-      });
-      return false;
     }
-  })
-  // ^^^^^^^^^^^^ 用來整理、排序和計算可以加入的禮物
+    giftCardUiChange({ cardElement: row, text: CARD_TEXT.NotEnough, ...CARD_STATE.Fail });
+    return false;
+  });
 
-  // 用來將以抽取篩選好的禮物
-  function clickAvailableGift(giftElement) {
-    giftElement.parentNode.style.backgroundColor = '#ff01';
-    const linkEl = giftElement.querySelector('.giveaway__heading__name');
-    const giftPageWindow = window.open(linkEl.href, linkEl.innerText, 'width=1000,height=600,top=100');
-
-    window.scrollBy({
-      top: giftElement.getBoundingClientRect().top - (Math.random() * 200) - 100,
-      behavior: "smooth"
-    })
-
-    giftPageWindow.addEventListener('load', () => {
-      let giftPageDocument = giftPageWindow.document;
-      if(giftPageDocument.querySelector('div[data-do="entry_insert"]')) giftPageDocument.querySelector('div[data-do="entry_insert"]').click();
-
-      checkGiftPageState(giftPageWindow, giftElement).then(() => {
-        countEntryGift++;
-        chrome.runtime.sendMessage({type: "setBadgeText", text: String(countEntryGift)});
-        chrome.storage.sync.get(["totalEnterGiveaway"], function(config) {
-          const total = ((config.totalEnterGiveaway || 0) * 1) + 1;
-  
-          chrome.storage.sync.set({
-            totalEnterGiveaway: total
-          })
-        });
-        giftCardUiChange({
-          cardElement: giftElement,
-          text: CARD_TEXT.Enter,
-          ...CARD_STATE.Success
-        });
-      }).catch(() => {
-        giftCardUiChange({
-          cardElement: giftElement,
-          text: CARD_TEXT.Fail,
-          ...CARD_STATE.Fail
-        });
-      }).finally(() => {
-        setTimeout(() => {
-          checkAvailableGiftDone(enterAvailableGiftInstance.next());
-        }, Math.floor(Math.random() * 200));
-      });
-    })
-  }
-  // ^^^^^^^^^^^^ 用來將以抽取篩選好的禮物
-
-  // 因為沒辦法確認加入到完成會多久所以需要定時檢查
-  let checkGiftPageStateTimer;
-  function checkGiftPageState(pageWindow) {
+  // 3) 點擊 inline 的 quick-entry 按鈕後，輪詢該列是否變成 is-faded（代表抽取成功）
+  function enterGiveaway(row) {
     return new Promise((resolve, reject) => {
-      checkGiftPageStateTimer = setInterval(() => {
-        // 當無法抽取禮物等狀況出現的時候 entry_insert 的 element 會不存在
-        if(!pageWindow.document.querySelector('div[data-do="entry_insert"]')) {
-          reject('沒點數');
-          clearInterval(checkGiftPageStateTimer);
-          pageWindow.close();
-        // 當該獎品狀況正常，被典籍後那個按鈕隱藏的時候代表正確抽取
-        } else if(pageWindow.document.querySelector('div[data-do="entry_insert"]').classList.contains('is-hidden')) {
-          resolve('有點數');
-          clearInterval(checkGiftPageStateTimer);
-          pageWindow.close();
+      const insertBtn = row.querySelector('.giveaway__quick-entry-btn--insert');
+      if (!insertBtn || insertBtn.classList.contains('is-locked')) {
+        reject(new Error('not enterable'));
+        return;
+      }
+
+      row.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      row.parentNode.style.backgroundColor = '#ff01';
+      insertBtn.click();
+
+      let tries = 0;
+      const timer = setInterval(() => {
+        tries++;
+        // 成功：SteamGifts 在抽取成功後會把該列加上 is-faded
+        if (row.classList.contains('is-faded')) {
+          clearInterval(timer);
+          resolve();
+        // 失敗：按鈕變成 is-locked（例如中途點數不足）
+        } else if (insertBtn.classList.contains('is-locked')) {
+          clearInterval(timer);
+          reject(new Error('locked after click'));
+        // 逾時保險（約 6 秒）
+        } else if (tries > 12) {
+          clearInterval(timer);
+          reject(new Error('timeout'));
         }
-      }, 600);
-    })
+      }, 500);
+    });
   }
-  // ^^^^^^^^^^^^ 因為沒辦法確認加入到完成會多久所以需要定時檢查
 
-  // 建立一個 yield function 來慢慢執行每一個加入程序
-  function* enterAvailableGift(readyToEnterGiftElements){
-    for(let readyToEnterGiftElement of readyToEnterGiftElements) {
-      yield clickAvailableGift(readyToEnterGiftElement);
+  // 4) 逐一抽取，每次之間留一點隨機間隔
+  async function enterAll(list) {
+    for (const row of list) {
+      try {
+        await enterGiveaway(row);
+        countEntryGift++;
+        chrome.runtime.sendMessage({ type: "setBadgeText", text: String(countEntryGift) });
+        chrome.storage.sync.get(["totalEnterGiveaway"], function (config) {
+          const total = ((config.totalEnterGiveaway || 0) * 1) + 1;
+          chrome.storage.sync.set({ totalEnterGiveaway: total });
+        });
+        giftCardUiChange({ cardElement: row, text: CARD_TEXT.Enter, ...CARD_STATE.Success });
+      } catch (e) {
+        giftCardUiChange({ cardElement: row, text: CARD_TEXT.Fail, ...CARD_STATE.Fail });
+      }
+      await delay(Math.floor(Math.random() * 200) + 100);
     }
+    window.scrollTo({ top: 0, behavior: "smooth" });
   }
-  // ^^^^^^^^^^^^ 建立一個 yield function 來慢慢執行每一個加入程序
 
-  // 用來判斷是否抽完所有禮物
-  function checkAvailableGiftDone(enterAvailableGiftYield) {
-    if(enterAvailableGiftYield.done) {
-      window.scrollTo({
-        top: 0,
-        behavior: "smooth"
-      })
-    }
-  }
-  // ^^^^^^^^^^^^ 用來判斷是否抽完所有禮物
-
-  const enterAvailableGiftInstance = enterAvailableGift(readyToEnterGiftElements);
-
-  checkAvailableGiftDone(enterAvailableGiftInstance.next());
+  enterAll(readyToEnterGiftElements);
 }, 500);
