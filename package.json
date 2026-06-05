@@ -1,0 +1,12 @@
+{
+  "name": "auto-steamgift",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Tooling/tests for the auto-steamgift Chrome extension",
+  "scripts": {
+    "test": "node --test"
+  },
+  "devDependencies": {
+    "jsdom": "^24.1.0"
+  }
+}
