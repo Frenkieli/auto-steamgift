@@ -1,12 +1,13 @@
+let fullAutoRunning = false;
+
 async function ensureOffscreen() {
-  try {
+  const has = await chrome.offscreen.hasDocument();
+  if (!has) {
     await chrome.offscreen.createDocument({
       url: "offscreen.html",
       reasons: ["DOM_PARSER"],
       justification: "Fetch and parse the SteamGifts wishlist to auto-enter giveaways in the background."
     });
-  } catch (e) {
-    // a document already exists — reuse it
   }
 }
 
@@ -90,11 +91,16 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     }
 
     case "fullAutoWishlist": {
-      ensureOffscreen().then(() => chrome.runtime.sendMessage({ type: "runFullAuto" }));
+      if (fullAutoRunning) break;
+      fullAutoRunning = true;
+      ensureOffscreen()
+        .then(() => chrome.runtime.sendMessage({ type: "runFullAuto" }))
+        .catch(() => { fullAutoRunning = false; });
       break;
     }
 
     case "fullAutoResult": {
+      fullAutoRunning = false;
       chrome.notifications.create({
         type: 'basic',
         iconUrl: "icons/logo.png",

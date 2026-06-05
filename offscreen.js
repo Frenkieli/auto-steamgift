@@ -44,7 +44,7 @@ async function runFullAuto() {
   if (!xsrf) return 0;
 
   const pointsEl = doc.querySelector('.nav__points');
-  let myPoint = pointsEl ? Number(pointsEl.innerText) : 0;
+  let myPoint = pointsEl ? Number((pointsEl.textContent || '').replace(/[^0-9]/g, '')) || 0 : 0;
 
   const core = window.GiveawayCore;
   const rows = [...doc.getElementsByClassName('giveaway__row-inner-wrap')];
@@ -81,8 +81,8 @@ async function runFullAuto() {
       chrome.storage.sync.get(["totalEnterGiveaway"], (c) => {
         chrome.storage.sync.set({ totalEnterGiveaway: (c.totalEnterGiveaway || 0) + 1 });
       });
-      await delayRandom();
     }
+    await delayRandom();
   }
   return count;
 }
