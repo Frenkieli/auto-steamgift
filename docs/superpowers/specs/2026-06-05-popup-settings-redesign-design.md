@@ -21,11 +21,11 @@
 
 1. **⚡ 全自動抽取願望清單**（最上方，主要動作按鈕）
    - 只抽願望清單（wishlist）的 giveaway，刻意限制範圍以降低帳號被封鎖的風險。
-   - 運作方式（採方案 A，最低封鎖風險、重用現有程式）：點擊後開啟／切換到願望清單搜尋頁
-     `https://www.steamgifts.com/giveaways/search?type=wishlist`，在頁面上用現有的「模擬點擊 quick-entry」邏輯逐一抽取，完成後跳出通知「已自動抽取 N 件願望清單禮物」。
-   - 不採背景靜默抽取（方案 B），因為較像機器人行為、封鎖風險較高，且與「避免過度使用」初衷衝突。
-   - **封鎖警告**：按鈕下方常駐一行小字警告；且第一次點擊時跳確認對話框（「了解風險才繼續」），同意後記住不再問。
-   - 抽取時一樣套用設定頁的計分權重與最低限度門檻。
+   - 運作方式（**改採背景處理，不開分頁**）：點擊後由 service worker 建立一個 offscreen document（`offscreen.html`，理由 `DOM_PARSER`），由它用使用者的登入 session `fetch` 願望清單搜尋頁
+     `https://www.steamgifts.com/giveaways/search?type=wishlist`，以 `DOMParser` 解析後重用 `giveaway-core`（`calculateWeight` 注入分數 span → `passesMinimum` 過濾 → `parsePointCost`/`extractCode`），再逐一 POST 到 `https://www.steamgifts.com/ajax.php`（`do=entry_insert`、`code`、`xsrf_token`，帶 `X-Requested-With: XMLHttpRequest` 與 `credentials: include`）。每次請求之間插入隨機延遲（約 0.8–2 秒）以降低被偵測風險。完成後回報數量，service worker 跳通知「已自動抽取 N 件願望清單禮物」並關閉 offscreen document。
+   - **設計取捨（已與使用者確認、推翻原方案 A）**：原本選擇「開分頁＋模擬點擊」是為了最低封鎖風險，但使用者認為開分頁體驗太奇怪，改為背景處理。背景送出請求**比較像機器人、封鎖風險較高**；以隨機延遲、僅限願望清單、無失敗重試（失敗也照樣延遲、不連續猛打）來緩解。使用者已了解並接受此風險。
+   - **封鎖警告**：按鈕下方常駐一行小字警告；且第一次點擊時，按鈕改標為「⚠ 再按一次確認」要求再按一次（MV3 popup 無法使用 `confirm()` 對話框），確認後記住不再問（`fullAutoWarned`）。
+   - 抽取時一樣套用設定頁的計分權重與最低限度門檻、保留點數門檻（`pointFloor`）。
 
 2. **狀態列**：並排兩個數字卡
    - 目前點數（打開 popup 時向 `steamgifts.com` 取得；未登入或取不到時顯示 `—`）。
@@ -93,9 +93,11 @@
   - `requiredTypes`：`{ restricted: bool, whitelist: bool, group: bool, mode: "any" | "all" }`（預設皆 false、mode `"any"`）
   - `pointFloor`：number（保留點數門檻，預設 0）
   - `goLinkTarget`：`"wishlist" | "home" | "reuse"`（預設 `"wishlist"`）
-  - `fullAutoWarned`：bool（第一次確認對話框是否已同意，預設 false）
+  - `fullAutoWarned`：bool（全自動按鈕第一次「再按一次確認」是否已同意，預設 false）
 
 `defaultSchema.json` 需補上以上新鍵的預設值。
+
+**manifest**：新增 `offscreen` 權限（背景全自動需要建立 offscreen document）。其餘權限（storage / scripting / tabs / notifications）與 host_permissions 已足夠。
 
 ## 抽取邏輯調整
 
@@ -103,9 +105,11 @@
 - 分數 < `minScore` → 跳過
 - 等級 < `minLevel` → 跳過
 - `requiredTypes` 有勾選時，依 `mode`（any/all）判斷該列是否符合 → 不符合跳過
-- 點數低於 `pointFloor` 時停止抽取
+- 扣完點數會低於 `pointFloor` 的禮物 → 跳過（保留底線點數）
 
-全自動願望清單按鈕：開啟願望清單搜尋頁後，注入與 `autoStart` 相同的抽取流程（不受 `autoStart` 開關影響，為手動觸發），完成後回報抽取數量並以 `chrome.notifications` 顯示「已自動抽取 N 件願望清單禮物」。
+`giveaway-core.js` 同時被三處重用：頁面上的 `countScore.js` / `autoStart.js`（DOM 是已渲染的頁面）以及背景的 `offscreen.js`（DOM 是 `DOMParser` 解析出的未渲染文件）。因此 core 內部一律用 `textContent`／attribute／classList 讀取，不依賴 `innerText` 等需要排版的屬性。
+
+全自動願望清單（背景版）：service worker 收到 `fullAutoWishlist` → `ensureOffscreen()`（先 `hasDocument()` 判斷再建立）→ 廣播 `runFullAuto` 給 offscreen。offscreen `fetch` 願望清單頁、解析、套用上述計分與最低限度過濾、逐一 POST 加入（每次請求間隨機延遲、失敗也照樣延遲不連打），回報 `fullAutoResult{count}`。service worker 以 `chrome.notifications` 顯示「已自動抽取 N 件願望清單禮物」並 `closeDocument()`。以 `fullAutoRunning` 旗標避免重複點擊造成兩個並行抽取迴圈。此流程不受 `autoStart` 開關影響（手動觸發）。
 
 ## 刻意不做（YAGNI）
 
