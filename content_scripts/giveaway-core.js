@@ -46,7 +46,7 @@
       }
 
       const cost = config.cost.trigger
-        ? (this.parsePointCost(row) || 0) * 0.1 * Number(config.cost.value)
+        ? (GiveawayCore.parsePointCost(row) || 0) * 0.1 * Number(config.cost.value)
         : 0;
 
       const total = restricted + whitelist + group + level + cost;
