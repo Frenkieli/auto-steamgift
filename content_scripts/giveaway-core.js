@@ -30,7 +30,28 @@
       const value = Number((span.textContent || '').replace(/[^0-9.]/g, ''));
       return Number.isNaN(value) ? 0 : value;
     },
-    calculateWeight(row, config) { return 0; },
+    calculateWeight(row, config) {
+      const restricted = config.restricted.trigger && row.querySelector('.giveaway__column--region-restricted')
+        ? Number(config.restricted.value) : 0;
+      const whitelist = config.whitelist.trigger && row.querySelector('.giveaway__column--whitelist')
+        ? Number(config.whitelist.value) : 0;
+      const group = config.group.trigger && row.querySelector('.giveaway__column--group')
+        ? Number(config.group.value) : 0;
+
+      let level = 0;
+      const levelEl = row.querySelector('.giveaway__column--contributor-level');
+      if (config.level.trigger && levelEl) {
+        const lvl = Number((levelEl.textContent || '').replace(/[^0-9]/g, '')) || 0;
+        level = lvl * Number(config.level.value);
+      }
+
+      const cost = config.cost.trigger
+        ? (this.parsePointCost(row) || 0) * 0.1 * Number(config.cost.value)
+        : 0;
+
+      const total = restricted + whitelist + group + level + cost;
+      return Math.round(total * 1000) / 1000;
+    },
   };
 
   root.GiveawayCore = GiveawayCore;

@@ -77,3 +77,30 @@ test('getScore returns 0 when no score span is present', () => {
   const row = dom.window.document.querySelector('.giveaway__row-inner-wrap');
   assert.strictEqual(GiveawayCore.getScore(row), 0);
 });
+
+const CONFIG = {
+  restricted: { trigger: true, value: 100 },
+  whitelist: { trigger: false, value: 50 },
+  group: { trigger: false, value: 50 },
+  level: { trigger: true, value: 20 },
+  cost: { trigger: true, value: 1 },
+};
+
+test('calculateWeight: region-restricted + copies row (Row D)', () => {
+  const r = rows(loadFixture());
+  // region-restricted present -> 100; no level column -> 0; cost 2 -> 2*0.1*1 = 0.2
+  assert.strictEqual(GiveawayCore.calculateWeight(r[3], CONFIG), 100.2);
+});
+
+test('calculateWeight: level + cost row, no region (Row A)', () => {
+  const r = rows(loadFixture());
+  // no region -> 0; level "Level 1+" -> 1*20 = 20; cost 5 -> 5*0.1*1 = 0.5
+  assert.strictEqual(GiveawayCore.calculateWeight(r[0], CONFIG), 20.5);
+});
+
+test('calculateWeight: a disabled trigger contributes nothing', () => {
+  const r = rows(loadFixture());
+  const cfg = { ...CONFIG, restricted: { trigger: false, value: 100 } };
+  // Row D with restricted disabled -> only cost 0.2
+  assert.strictEqual(GiveawayCore.calculateWeight(r[3], cfg), 0.2);
+});
