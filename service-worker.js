@@ -1,3 +1,27 @@
+const fullAutoTabs = new Set();
+
+function openWishlistTab(callback) {
+  const url = "https://www.steamgifts.com/giveaways/search?type=wishlist";
+  chrome.tabs.query({ url: "https://www.steamgifts.com/*" }, (tabs) => {
+    if (tabs.length > 0) {
+      chrome.tabs.update(tabs[0].id, { url, active: true }, (tab) => callback(tab.id));
+    } else {
+      chrome.tabs.create({ url }, (tab) => callback(tab.id));
+    }
+  });
+}
+
+function injectFullAuto(tabId) {
+  chrome.scripting.executeScript({
+    target: { tabId },
+    files: [
+      "content_scripts/giveaway-core.js",
+      "content_scripts/countScore.js",
+      "content_scripts/autoStart.js"
+    ]
+  });
+}
+
 chrome.runtime.onInstalled.addListener(function(details){
   if(details.reason == "install"){
     fetch("defaultSchema.json").then(function (res) {
@@ -53,7 +77,9 @@ chrome.storage.onChanged.addListener((changes, areaName) => {
     }
   }
 
-  if(!(Object.keys(changes).length === 1 &&  changes.totalEnterGiveaway)) {
+  const NO_RELOAD_KEYS = ["totalEnterGiveaway", "fullAutoWarned", "goLinkTarget"];
+  const onlyCosmetic = Object.keys(changes).every((k) => NO_RELOAD_KEYS.includes(k));
+  if(!onlyCosmetic) {
     // 更新重整網站
     chrome.tabs.query({url: "https://www.steamgifts.com/*"}, function (tabs){
       tabs.forEach(tab => {
@@ -67,23 +93,46 @@ chrome.storage.onChanged.addListener((changes, areaName) => {
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   switch (message.type) {
     case "countScoreEnd": {
-      chrome.storage.sync.get(["autoStart"], function(config) {
-        if(config.autoStart.trigger) {
+      // full-auto tabs already inject autoStart themselves — don't double-inject
+      if (sender.tab && fullAutoTabs.has(sender.tab.id)) break;
+      chrome.storage.sync.get(["autoStart"], function (config) {
+        if (config.autoStart.trigger) {
           injectAutoScript(sender.tab.id);
         }
       });
       break;
     }
 
-    case "setBadgeText": {
-      chrome.action.setBadgeText({
-        tabId: sender.tab.id,
-        text: message.text
-      });
+    case "autoEnterDone": {
+      if (sender.tab && fullAutoTabs.has(sender.tab.id)) {
+        fullAutoTabs.delete(sender.tab.id);
+        chrome.notifications.create({
+          type: 'basic',
+          iconUrl: "icons/logo.png",
+          title: chrome.i18n.getMessage("extName"),
+          message: chrome.i18n.getMessage("notifyFullAutoDone", [String(message.count)])
+        });
+      }
+      break;
+    }
 
-      chrome.action.setBadgeBackgroundColor({
-        color: "#583628"
+    case "fullAutoWishlist": {
+      openWishlistTab((tabId) => {
+        fullAutoTabs.add(tabId);
+        const listener = (updatedId, info) => {
+          if (updatedId === tabId && info.status === "complete") {
+            chrome.tabs.onUpdated.removeListener(listener);
+            injectFullAuto(tabId);
+          }
+        };
+        chrome.tabs.onUpdated.addListener(listener);
       });
+      break;
+    }
+
+    case "setBadgeText": {
+      chrome.action.setBadgeText({ tabId: sender.tab.id, text: message.text });
+      chrome.action.setBadgeBackgroundColor({ color: "#583628" });
       break;
     }
     default:
