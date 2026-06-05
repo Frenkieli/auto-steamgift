@@ -2,7 +2,14 @@
   // Reuse an existing instance if already injected (browser idempotency),
   // otherwise build it. Either way we always assign + export below.
   const GiveawayCore = root.GiveawayCore || {
-    parsePointCost(row) { return null; },
+    parsePointCost(row) {
+      const thins = row.querySelectorAll('.giveaway__heading__thin');
+      for (let i = thins.length - 1; i >= 0; i--) {
+        const match = (thins[i].textContent || '').match(/\((\d+)P\)/);
+        if (match) return Number(match[1]);
+      }
+      return null;
+    },
     extractCode(row) { return null; },
     isEnterable(row) { return false; },
     getScore(row) { return 0; },
