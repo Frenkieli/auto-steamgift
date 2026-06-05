@@ -1,7 +1,7 @@
 (function (root) {
-  if (root.GiveawayCore) return; // browser: idempotent across double-injection
-
-  const GiveawayCore = {
+  // Reuse an existing instance if already injected (browser idempotency),
+  // otherwise build it. Either way we always assign + export below.
+  const GiveawayCore = root.GiveawayCore || {
     parsePointCost(row) { return null; },
     extractCode(row) { return null; },
     isEnterable(row) { return false; },
