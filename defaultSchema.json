@@ -25,5 +25,11 @@
   "autoStart": {
     "trigger": false
   },
-  "totalEnterGiveaway": 0
+  "totalEnterGiveaway": 0,
+  "minScore": 0,
+  "minLevel": 0,
+  "requiredTypes": { "restricted": false, "whitelist": false, "group": false, "mode": "any" },
+  "pointFloor": 0,
+  "goLinkTarget": "wishlist",
+  "fullAutoWarned": false
 }
