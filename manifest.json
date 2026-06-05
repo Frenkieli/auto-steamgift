@@ -17,7 +17,8 @@
     "storage",
     "scripting",
     "tabs",
-    "notifications"
+    "notifications",
+    "offscreen"
   ],
   "storage": {
     "managed_schema": "schema.json"

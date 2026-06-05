@@ -1,27 +1,13 @@
-const fullAutoTabs = new Set();
-
-function openWishlistTab(callback) {
-  const url = "https://www.steamgifts.com/giveaways/search?type=wishlist";
-  chrome.tabs.query({ url: "https://www.steamgifts.com/*" }, (tabs) => {
-    if (tabs.length > 0) {
-      const existing = tabs[0];
-      const alreadyThere = !!existing.url && existing.url.split('#')[0] === url;
-      chrome.tabs.update(existing.id, { url, active: true }, (tab) => callback(tab.id, alreadyThere));
-    } else {
-      chrome.tabs.create({ url }, (tab) => callback(tab.id, false));
-    }
-  });
-}
-
-function injectFullAuto(tabId) {
-  chrome.scripting.executeScript({
-    target: { tabId },
-    files: [
-      "content_scripts/giveaway-core.js",
-      "content_scripts/countScore.js",
-      "content_scripts/autoStart.js"
-    ]
-  }).catch(() => { fullAutoTabs.delete(tabId); });
+async function ensureOffscreen() {
+  try {
+    await chrome.offscreen.createDocument({
+      url: "offscreen.html",
+      reasons: ["DOM_PARSER"],
+      justification: "Fetch and parse the SteamGifts wishlist to auto-enter giveaways in the background."
+    });
+  } catch (e) {
+    // a document already exists — reuse it
+  }
 }
 
 chrome.runtime.onInstalled.addListener(function(details){
@@ -95,8 +81,6 @@ chrome.storage.onChanged.addListener((changes, areaName) => {
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   switch (message.type) {
     case "countScoreEnd": {
-      // full-auto tabs already inject autoStart themselves — don't double-inject
-      if (sender.tab && fullAutoTabs.has(sender.tab.id)) break;
       chrome.storage.sync.get(["autoStart"], function (config) {
         if (config.autoStart.trigger) {
           injectAutoScript(sender.tab.id);
@@ -105,43 +89,19 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       break;
     }
 
-    case "autoEnterDone": {
-      if (sender.tab && fullAutoTabs.has(sender.tab.id)) {
-        fullAutoTabs.delete(sender.tab.id);
-        chrome.notifications.create({
-          type: 'basic',
-          iconUrl: "icons/logo.png",
-          title: chrome.i18n.getMessage("extName"),
-          message: chrome.i18n.getMessage("notifyFullAutoDone", [String(message.count)])
-        });
-      }
+    case "fullAutoWishlist": {
+      ensureOffscreen().then(() => chrome.runtime.sendMessage({ type: "runFullAuto" }));
       break;
     }
 
-    case "fullAutoWishlist": {
-      // NOTE: fullAutoTabs is in-memory. If the MV3 worker suspends mid-flow the
-      // tracking is lost and the completion notification may not fire — acceptable
-      // at single-user scale (worst case: the user clicks again).
-      openWishlistTab((tabId, alreadyThere) => {
-        fullAutoTabs.add(tabId);
-        let injected = false;
-        const run = () => {
-          if (injected) return;
-          injected = true;
-          chrome.tabs.onUpdated.removeListener(listener);
-          injectFullAuto(tabId);
-        };
-        const listener = (updatedId, info) => {
-          if (updatedId === tabId && info.status === "complete") run();
-        };
-        chrome.tabs.onUpdated.addListener(listener);
-        // Same-URL reuse fires no fresh "complete" — inject if the tab is already loaded.
-        if (alreadyThere) {
-          chrome.tabs.get(tabId, (tab) => {
-            if (!chrome.runtime.lastError && tab && tab.status === "complete") run();
-          });
-        }
+    case "fullAutoResult": {
+      chrome.notifications.create({
+        type: 'basic',
+        iconUrl: "icons/logo.png",
+        title: chrome.i18n.getMessage("extName"),
+        message: chrome.i18n.getMessage("notifyFullAutoDone", [String(message.count)])
       });
+      chrome.offscreen.closeDocument().catch(() => {});
       break;
     }
 
