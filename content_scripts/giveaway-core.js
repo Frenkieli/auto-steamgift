@@ -24,7 +24,12 @@
       if (!insert) return false;
       return !insert.classList.contains('is-locked');
     },
-    getScore(row) { return 0; },
+    getScore(row) {
+      const span = row.querySelector('span.auto_steam-score');
+      if (!span) return 0;
+      const value = Number((span.textContent || '').replace(/[^0-9.]/g, ''));
+      return Number.isNaN(value) ? 0 : value;
+    },
     calculateWeight(row, config) { return 0; },
   };
 

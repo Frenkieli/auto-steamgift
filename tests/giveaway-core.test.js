@@ -65,3 +65,15 @@ test('isEnterable is false when there is no insert button', () => {
   const row = dom.window.document.querySelector('.giveaway__row-inner-wrap');
   assert.strictEqual(GiveawayCore.isEnterable(row), false);
 });
+
+test('getScore reads the injected auto_steam-score value', () => {
+  const r = rows(loadFixture());
+  assert.strictEqual(GiveawayCore.getScore(r[0]), 120);  // Row A
+  assert.strictEqual(GiveawayCore.getScore(r[3]), 50);   // Row D
+});
+
+test('getScore returns 0 when no score span is present', () => {
+  const dom = new (require('jsdom').JSDOM)('<div class="giveaway__row-inner-wrap"></div>');
+  const row = dom.window.document.querySelector('.giveaway__row-inner-wrap');
+  assert.strictEqual(GiveawayCore.getScore(row), 0);
+});
