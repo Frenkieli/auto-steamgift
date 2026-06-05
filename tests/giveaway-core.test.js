@@ -104,3 +104,13 @@ test('calculateWeight: a disabled trigger contributes nothing', () => {
   // Row D with restricted disabled -> only cost 0.2
   assert.strictEqual(GiveawayCore.calculateWeight(r[3], cfg), 0.2);
 });
+
+test('getContributorLevel reads the contributor level number', () => {
+  const r = rows(loadFixture());
+  assert.strictEqual(GiveawayCore.getContributorLevel(r[0]), 1);  // Row A "Level 1+"
+});
+
+test('getContributorLevel returns 0 when no level column exists', () => {
+  const r = rows(loadFixture());
+  assert.strictEqual(GiveawayCore.getContributorLevel(r[3]), 0);  // Row D has no level column
+});

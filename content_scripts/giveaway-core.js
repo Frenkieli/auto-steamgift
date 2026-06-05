@@ -30,6 +30,12 @@
       const value = Number((span.textContent || '').replace(/[^0-9.]/g, ''));
       return Number.isNaN(value) ? 0 : value;
     },
+    getContributorLevel(row) {
+      const el = row.querySelector('.giveaway__column--contributor-level');
+      if (!el) return 0;
+      const value = Number((el.textContent || '').replace(/[^0-9]/g, ''));
+      return Number.isNaN(value) ? 0 : value;
+    },
     calculateWeight(row, config) {
       const restricted = config.restricted.trigger && row.querySelector('.giveaway__column--region-restricted')
         ? Number(config.restricted.value) : 0;
