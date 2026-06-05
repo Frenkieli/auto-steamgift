@@ -4,9 +4,11 @@ function openWishlistTab(callback) {
   const url = "https://www.steamgifts.com/giveaways/search?type=wishlist";
   chrome.tabs.query({ url: "https://www.steamgifts.com/*" }, (tabs) => {
     if (tabs.length > 0) {
-      chrome.tabs.update(tabs[0].id, { url, active: true }, (tab) => callback(tab.id));
+      const existing = tabs[0];
+      const alreadyThere = !!existing.url && existing.url.split('#')[0] === url;
+      chrome.tabs.update(existing.id, { url, active: true }, (tab) => callback(tab.id, alreadyThere));
     } else {
-      chrome.tabs.create({ url }, (tab) => callback(tab.id));
+      chrome.tabs.create({ url }, (tab) => callback(tab.id, false));
     }
   });
 }
@@ -19,7 +21,7 @@ function injectFullAuto(tabId) {
       "content_scripts/countScore.js",
       "content_scripts/autoStart.js"
     ]
-  });
+  }).catch(() => { fullAutoTabs.delete(tabId); });
 }
 
 chrome.runtime.onInstalled.addListener(function(details){
@@ -117,15 +119,28 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     }
 
     case "fullAutoWishlist": {
-      openWishlistTab((tabId) => {
+      // NOTE: fullAutoTabs is in-memory. If the MV3 worker suspends mid-flow the
+      // tracking is lost and the completion notification may not fire — acceptable
+      // at single-user scale (worst case: the user clicks again).
+      openWishlistTab((tabId, alreadyThere) => {
         fullAutoTabs.add(tabId);
+        let injected = false;
+        const run = () => {
+          if (injected) return;
+          injected = true;
+          chrome.tabs.onUpdated.removeListener(listener);
+          injectFullAuto(tabId);
+        };
         const listener = (updatedId, info) => {
-          if (updatedId === tabId && info.status === "complete") {
-            chrome.tabs.onUpdated.removeListener(listener);
-            injectFullAuto(tabId);
-          }
+          if (updatedId === tabId && info.status === "complete") run();
         };
         chrome.tabs.onUpdated.addListener(listener);
+        // Same-URL reuse fires no fresh "complete" — inject if the tab is already loaded.
+        if (alreadyThere) {
+          chrome.tabs.get(tabId, (tab) => {
+            if (!chrome.runtime.lastError && tab && tab.status === "complete") run();
+          });
+        }
       });
       break;
     }
