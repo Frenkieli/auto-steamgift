@@ -10,7 +10,14 @@
       }
       return null;
     },
-    extractCode(row) { return null; },
+    extractCode(row) {
+      const input = row.querySelector('form.giveaway__quick-entry-form input[name="code"]');
+      if (input && input.value) return input.value;
+      const link = row.querySelector('a.giveaway__heading__name');
+      if (!link) return null;
+      const match = (link.getAttribute('href') || '').match(/\/giveaway\/([^/]+)/);
+      return match ? match[1] : null;
+    },
     isEnterable(row) { return false; },
     getScore(row) { return 0; },
     calculateWeight(row, config) { return 0; },

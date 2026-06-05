@@ -31,3 +31,16 @@ test('parsePointCost returns null when no point span exists', () => {
   const row = dom.window.document.querySelector('.giveaway__row-inner-wrap');
   assert.strictEqual(GiveawayCore.parsePointCost(row), null);
 });
+
+test('extractCode reads the code from the quick-entry form input', () => {
+  const r = rows(loadFixture());
+  assert.strictEqual(GiveawayCore.extractCode(r[0]), 'aaaaa');
+});
+
+test('extractCode falls back to the heading href when no form input exists', () => {
+  const dom = new (require('jsdom').JSDOM)(
+    '<div class="giveaway__row-inner-wrap"><a class="giveaway__heading__name" href="https://www.steamgifts.com/giveaway/zzzzz/game-z">Z</a></div>'
+  );
+  const row = dom.window.document.querySelector('.giveaway__row-inner-wrap');
+  assert.strictEqual(GiveawayCore.extractCode(row), 'zzzzz');
+});
