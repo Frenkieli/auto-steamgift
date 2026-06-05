@@ -122,3 +122,50 @@ test('getContributorLevel handles multi-digit levels', () => {
   const row = dom.window.document.querySelector('.giveaway__row-inner-wrap');
   assert.strictEqual(GiveawayCore.getContributorLevel(row), 10);
 });
+
+test('passesMinimum passes when no constraints are set', () => {
+  const r = rows(loadFixture());
+  assert.strictEqual(
+    GiveawayCore.passesMinimum(r[0], { minScore: 0, minLevel: 0, requiredTypes: {} }),
+    true
+  );
+});
+
+test('passesMinimum fails when score is below minScore', () => {
+  const r = rows(loadFixture());
+  assert.strictEqual(GiveawayCore.passesMinimum(r[0], { minScore: 150 }), false);  // Row A score 120
+});
+
+test('passesMinimum fails when level is below minLevel', () => {
+  const r = rows(loadFixture());
+  assert.strictEqual(GiveawayCore.passesMinimum(r[0], { minLevel: 2 }), false);  // Row A level 1
+});
+
+test('passesMinimum (mode any) matches a region-restricted row', () => {
+  const r = rows(loadFixture());
+  assert.strictEqual(
+    GiveawayCore.passesMinimum(r[3], { requiredTypes: { restricted: true, mode: 'any' } }),
+    true   // Row D is region-restricted
+  );
+  assert.strictEqual(
+    GiveawayCore.passesMinimum(r[0], { requiredTypes: { restricted: true, mode: 'any' } }),
+    false  // Row A is not region-restricted
+  );
+});
+
+test('passesMinimum (mode all) requires every checked type', () => {
+  const dom = new (require('jsdom').JSDOM)(
+    '<div class="giveaway__row-inner-wrap">' +
+    '<div class="giveaway__column--region-restricted"></div>' +
+    '<div class="giveaway__column--whitelist"></div></div>'
+  );
+  const row = dom.window.document.querySelector('.giveaway__row-inner-wrap');
+  assert.strictEqual(
+    GiveawayCore.passesMinimum(row, { requiredTypes: { restricted: true, whitelist: true, mode: 'all' } }),
+    true
+  );
+  assert.strictEqual(
+    GiveawayCore.passesMinimum(row, { requiredTypes: { restricted: true, whitelist: true, group: true, mode: 'all' } }),
+    false  // no group column
+  );
+});

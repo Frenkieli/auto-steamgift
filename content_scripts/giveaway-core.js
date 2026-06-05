@@ -35,6 +35,27 @@
       if (!el) return 0;
       return Number((el.textContent || '').replace(/[^0-9]/g, '')) || 0;
     },
+    passesMinimum(row, config) {
+      const cfg = config || {};
+
+      const minScore = Number(cfg.minScore) || 0;
+      if (minScore > 0 && GiveawayCore.getScore(row) < minScore) return false;
+
+      const minLevel = Number(cfg.minLevel) || 0;
+      if (minLevel > 0 && GiveawayCore.getContributorLevel(row) < minLevel) return false;
+
+      const rt = cfg.requiredTypes || {};
+      const checks = [];
+      if (rt.restricted) checks.push(!!row.querySelector('.giveaway__column--region-restricted'));
+      if (rt.whitelist) checks.push(!!row.querySelector('.giveaway__column--whitelist'));
+      if (rt.group) checks.push(!!row.querySelector('.giveaway__column--group'));
+      if (checks.length > 0) {
+        const ok = rt.mode === 'all' ? checks.every(Boolean) : checks.some(Boolean);
+        if (!ok) return false;
+      }
+
+      return true;
+    },
     calculateWeight(row, config) {
       const restricted = config.restricted.trigger && row.querySelector('.giveaway__column--region-restricted')
         ? Number(config.restricted.value) : 0;
