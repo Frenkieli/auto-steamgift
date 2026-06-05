@@ -1,14 +1,20 @@
 const WEIGHT_KEYS = ["restricted", "whitelist", "group", "level", "cost"];
+const WEIGHT_DEFAULTS = {
+  restricted: { trigger: true, value: 100 },
+  whitelist: { trigger: true, value: 50 },
+  group: { trigger: true, value: 50 },
+  level: { trigger: true, value: 20 },
+  cost: { trigger: true, value: 1 }
+};
 
 function load() {
   chrome.storage.sync.get(
     [...WEIGHT_KEYS, "autoScore", "autoStart", "minScore", "minLevel", "requiredTypes", "pointFloor", "goLinkTarget"],
     function (cfg) {
       WEIGHT_KEYS.forEach((k) => {
-        if (cfg[k]) {
-          document.getElementById(`w-${k}-on`).checked = !!cfg[k].trigger;
-          document.getElementById(`w-${k}-val`).value = cfg[k].value;
-        }
+        const w = cfg[k] || WEIGHT_DEFAULTS[k];
+        document.getElementById(`w-${k}-on`).checked = !!w.trigger;
+        document.getElementById(`w-${k}-val`).value = w.value;
       });
       document.getElementById("minScore").value = cfg.minScore || 0;
       document.getElementById("minLevel").value = cfg.minLevel || 0;
@@ -74,7 +80,8 @@ document.getElementById("resetTotal").addEventListener("click", () => {
 document.getElementById("resetDefault").addEventListener("click", () => {
   fetch(chrome.runtime.getURL("defaultSchema.json"))
     .then((res) => res.json())
-    .then((data) => { chrome.storage.sync.set(data, () => location.reload()); });
+    .then((data) => { chrome.storage.sync.set(data, () => location.reload()); })
+    .catch((err) => console.error("restore defaults failed", err));
 });
 
 load();
