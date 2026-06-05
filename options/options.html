@@ -2,13 +2,65 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>__MSG_extName__-__MSG_popTitle__</title>
-  <link rel="stylesheet" href="popup.css">
+  <title>__MSG_extName__-__MSG_optTitle__</title>
+  <link rel="stylesheet" href="options.css">
 </head>
 <body>
-  選項葉面
+  <h1>__MSG_optTitle__</h1>
+
+  <section>
+    <h2>__MSG_optWeights__</h2>
+    <div class="weight-row"><input type="checkbox" id="w-restricted-on"><label>__MSG_formRestricted__</label><input type="number" id="w-restricted-val" min="0" step="1"></div>
+    <div class="weight-row"><input type="checkbox" id="w-whitelist-on"><label>__MSG_formWhitelist__</label><input type="number" id="w-whitelist-val" min="0" step="1"></div>
+    <div class="weight-row"><input type="checkbox" id="w-group-on"><label>__MSG_formGroup__</label><input type="number" id="w-group-val" min="0" step="1"></div>
+    <div class="weight-row"><input type="checkbox" id="w-level-on"><label>__MSG_formLevel__</label><input type="number" id="w-level-val" min="0" step="1"></div>
+    <div class="weight-row"><input type="checkbox" id="w-cost-on"><label>__MSG_formCost__</label><input type="number" id="w-cost-val" min="0" step="1"></div>
+  </section>
+
+  <section>
+    <h2>__MSG_optMinimum__</h2>
+    <div class="field"><label for="minScore">__MSG_optMinScore__</label><input type="number" id="minScore" min="0" step="1"></div>
+    <div class="field"><label for="minLevel">__MSG_optMinLevel__</label><input type="number" id="minLevel" min="0" step="1"></div>
+    <div class="field">
+      <label>__MSG_optRequiredTypes__</label>
+      <label class="inline"><input type="checkbox" id="rt-restricted">__MSG_formRestricted__</label>
+      <label class="inline"><input type="checkbox" id="rt-whitelist">__MSG_formWhitelist__</label>
+      <label class="inline"><input type="checkbox" id="rt-group">__MSG_formGroup__</label>
+      <select id="rt-mode">
+        <option value="any">__MSG_optModeAny__</option>
+        <option value="all">__MSG_optModeAll__</option>
+      </select>
+    </div>
+  </section>
+
+  <section>
+    <h2>__MSG_optTarget__</h2>
+    <select id="goLinkTarget">
+      <option value="wishlist">__MSG_optTargetWishlist__</option>
+      <option value="home">__MSG_optTargetHome__</option>
+      <option value="reuse">__MSG_optTargetReuse__</option>
+    </select>
+  </section>
+
+  <section>
+    <h2>__MSG_optAutomation__</h2>
+    <label class="field inline"><input type="checkbox" id="opt-autoScore">__MSG_formAutoScore__</label>
+    <label class="field inline"><input type="checkbox" id="opt-autoStart">__MSG_formAutoStart__</label>
+  </section>
+
+  <section>
+    <h2>__MSG_optPointFloorTitle__</h2>
+    <div class="field"><label for="pointFloor">__MSG_optPointFloor__</label><input type="number" id="pointFloor" min="0" step="1"></div>
+  </section>
+
+  <section>
+    <h2>__MSG_optData__</h2>
+    <button id="resetTotal">__MSG_optResetTotal__</button>
+    <button id="resetDefault">__MSG_optResetDefault__</button>
+  </section>
+
   <script src="init.js"></script>
+  <script src="options.js"></script>
 </body>
 </html>
