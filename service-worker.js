@@ -121,7 +121,7 @@ function registerCountScoreContentScripts () {
   .registerContentScripts([{
     id: "countScore-script",
     css: ["content_scripts/countScore.css"],
-    js: ["content_scripts/countScore.js"],
+    js: ["content_scripts/giveaway-core.js", "content_scripts/countScore.js"],
     persistAcrossSessions: false,
     excludeMatches: ["https://www.steamgifts.com/giveaway/*", "https://www.steamgifts.com/user/*", "https://www.steamgifts.com/stats/*"],
     matches: ["https://www.steamgifts.com/*"],
