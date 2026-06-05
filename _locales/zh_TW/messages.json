@@ -54,5 +54,29 @@
   "formAutoStart": {
     "message": "自動開始抽禮物",
     "description": "popup.html 的表單 SteamGift 關於是否自動開始抽禮物"
-  }
+  },
+  "popFullAuto": { "message": "全自動抽取願望清單", "description": "popup 全自動按鈕" },
+  "popFullAutoWarn": { "message": "過度使用可能導致帳號被封鎖，請謹慎", "description": "popup 全自動警告" },
+  "popFullAutoConfirm": { "message": "⚠ 再按一次確認", "description": "popup 全自動確認按鈕標籤" },
+  "popPoints": { "message": "目前點數", "description": "popup 目前點數標籤" },
+  "popGoSteam": { "message": "前往 SteamGifts", "description": "popup 前往按鈕" },
+  "notifyFullAutoDone": { "message": "已自動抽取 $COUNT$ 件願望清單禮物", "placeholders": { "count": { "content": "$1" } }, "description": "全自動完成通知" },
+  "optTitle": { "message": "設定", "description": "設定頁標題" },
+  "optWeights": { "message": "計分權重", "description": "設定頁權重區塊" },
+  "optMinimum": { "message": "最低限度（不符合就不抽）", "description": "設定頁最低限度區塊" },
+  "optMinScore": { "message": "最低分數門檻", "description": "設定頁最低分數" },
+  "optMinLevel": { "message": "最低等級", "description": "設定頁最低等級" },
+  "optRequiredTypes": { "message": "必須符合類型", "description": "設定頁必須符合類型" },
+  "optModeAny": { "message": "至少符合一項", "description": "必須符合類型 OR" },
+  "optModeAll": { "message": "全部符合", "description": "必須符合類型 AND" },
+  "optTarget": { "message": "前往 SteamGifts 開啟", "description": "設定頁目標頁" },
+  "optTargetWishlist": { "message": "願望清單搜尋頁（預設）", "description": "目標頁願望清單" },
+  "optTargetHome": { "message": "首頁", "description": "目標頁首頁" },
+  "optTargetReuse": { "message": "沿用已開的 SteamGifts 分頁", "description": "目標頁沿用分頁" },
+  "optAutomation": { "message": "自動化", "description": "設定頁自動化區塊" },
+  "optPointFloorTitle": { "message": "抽取行為", "description": "設定頁抽取行為區塊" },
+  "optPointFloor": { "message": "低於此點數就停止抽取", "description": "設定頁保留點數門檻" },
+  "optData": { "message": "資料", "description": "設定頁資料區塊" },
+  "optResetTotal": { "message": "重置累計加入", "description": "設定頁重置累計" },
+  "optResetDefault": { "message": "回復預設值", "description": "設定頁回復預設" }
 }

@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+<body>
+  <header>
+    <a class="nav__button" href="#">Account (<span class="nav__points">50</span>P / <span title="4.24">Level 4</span>)</a>
+  </header>
+
+  <!-- Row A: enterable, level requirement, cost 5P, score 120, code aaaaa -->
+  <div class="giveaway__row-outer-wrap" data-game-id="111">
+    <div class="giveaway__row-inner-wrap">
+      <div class="giveaway__summary">
+        <h2 class="giveaway__heading">
+          <a class="giveaway__heading__name" href="https://www.steamgifts.com/giveaway/aaaaa/game-a">Game A</a>
+          <span class="giveaway__heading__thin">(5P)</span>
+          <span class="auto_steam-score">(Score:120)</span>
+        </h2>
+        <div class="giveaway__columns">
+          <div class="giveaway__column--contributor-level giveaway__column--contributor-level--positive" title="Contributor Level">Level 1+</div>
+        </div>
+      </div>
+      <div class="giveaway__quick-entry-wrap">
+        <form class="giveaway__quick-entry-form">
+          <input type="hidden" name="xsrf_token" value="TESTTOKEN">
+          <input type="hidden" name="do" value="">
+          <input type="hidden" name="code" value="aaaaa">
+          <div data-do="entry_insert" class="giveaway__quick-entry-btn giveaway__quick-entry-btn--insert"><i class="fa fa-plus-circle"></i></div>
+          <div data-do="entry_delete" class="giveaway__quick-entry-btn giveaway__quick-entry-btn--delete"><i class="fa fa-minus-circle"></i></div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Row B: NOT enterable (insert is-locked), cost 10P, score 80, code bbbbb -->
+  <div class="giveaway__row-outer-wrap" data-game-id="222">
+    <div class="giveaway__row-inner-wrap">
+      <div class="giveaway__summary">
+        <h2 class="giveaway__heading">
+          <a class="giveaway__heading__name" href="https://www.steamgifts.com/giveaway/bbbbb/game-b">Game B</a>
+          <span class="giveaway__heading__thin">(10P)</span>
+          <span class="auto_steam-score">(Score:80)</span>
+        </h2>
+      </div>
+      <div class="giveaway__quick-entry-wrap">
+        <form class="giveaway__quick-entry-form">
+          <input type="hidden" name="xsrf_token" value="TESTTOKEN">
+          <input type="hidden" name="do" value="">
+          <input type="hidden" name="code" value="bbbbb">
+          <div data-do="entry_insert" class="giveaway__quick-entry-btn giveaway__quick-entry-btn--insert is-locked"><i class="fa fa-plus-circle"></i></div>
+          <div data-do="entry_delete" class="giveaway__quick-entry-btn giveaway__quick-entry-btn--delete"><i class="fa fa-minus-circle"></i></div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Row C: already entered (is-faded), cost 2P, code ccccc -->
+  <div class="giveaway__row-outer-wrap" data-game-id="333">
+    <div class="giveaway__row-inner-wrap is-faded">
+      <div class="giveaway__summary">
+        <h2 class="giveaway__heading">
+          <a class="giveaway__heading__name" href="https://www.steamgifts.com/giveaway/ccccc/game-c">Game C</a>
+          <span class="giveaway__heading__thin">(2P)</span>
+          <span class="auto_steam-score">(Score:30)</span>
+        </h2>
+      </div>
+      <div class="giveaway__quick-entry-wrap">
+        <form class="giveaway__quick-entry-form">
+          <input type="hidden" name="code" value="ccccc">
+          <div data-do="entry_insert" class="giveaway__quick-entry-btn giveaway__quick-entry-btn--insert"><i class="fa fa-plus-circle"></i></div>
+          <div data-do="entry_delete" class="giveaway__quick-entry-btn giveaway__quick-entry-btn--delete"><i class="fa fa-minus-circle"></i></div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Row D: enterable, region-restricted, copies + cost 2P, score 50, code ddddd -->
+  <div class="giveaway__row-outer-wrap" data-game-id="444">
+    <div class="giveaway__row-inner-wrap">
+      <div class="giveaway__summary">
+        <h2 class="giveaway__heading">
+          <a class="giveaway__heading__name" href="https://www.steamgifts.com/giveaway/ddddd/game-d">Game D</a>
+          <span class="giveaway__heading__thin">(100 Copies)</span>
+          <span class="giveaway__heading__thin">(2P)</span>
+          <span class="auto_steam-score">(Score:50)</span>
+        </h2>
+        <div class="giveaway__columns">
+          <a href="#" class="giveaway__column--region-restricted" title="Region Restricted"><i class="fa fa-fw fa-globe"></i></a>
+        </div>
+      </div>
+      <div class="giveaway__quick-entry-wrap">
+        <form class="giveaway__quick-entry-form">
+          <input type="hidden" name="code" value="ddddd">
+          <div data-do="entry_insert" class="giveaway__quick-entry-btn giveaway__quick-entry-btn--insert"><i class="fa fa-plus-circle"></i></div>
+          <div data-do="entry_delete" class="giveaway__quick-entry-btn giveaway__quick-entry-btn--delete"><i class="fa fa-minus-circle"></i></div>
+        </form>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

@@ -4,37 +4,30 @@ var allTextNodes = document.createTreeWalker(document.querySelector('html'), Nod
     tmpNode;
 
 while (allTextNodes.nextNode()) {
-    tmpNode = allTextNodes.currentNode;
-    tmpTxt = tmpNode.nodeValue;
-
-    tmpNode.nodeValue = tmpTxt.replace(/__MSG_(\w+)__/g, function(match, v1) {
-        return v1 ? (chrome.i18n.getMessage(v1) || match) : '';
-    });
+  tmpNode = allTextNodes.currentNode;
+  tmpTxt = tmpNode.nodeValue;
+  tmpNode.nodeValue = tmpTxt.replace(/__MSG_(\w+)__/g, function (match, v1) {
+    return v1 ? (chrome.i18n.getMessage(v1) || match) : '';
+  });
 }
 // ^^^^^^^^^^^^^^^^^^^^ replace all html i18n variable
 
-chrome.storage.sync.get(["restricted", "whitelist", "group", "level", "cost", "autoScore", "autoStart"], function(config) {
-  const method = {
-    trigger: (key, value) => {
-      document.getElementById(`form-${key}CheckBox`).checked = value;
-    },
-    value: (key, value) => {
-      document.getElementById(`form-${key}Score`).value = value;
-    }
-  }
-
-  Object.entries(config).forEach(([configKey, configValue]) => {
-    Object.entries(configValue).forEach(([key, value]) => {
-      method[key](configKey, value);
-    })
-  })
+// load the two automation toggles
+chrome.storage.sync.get(["autoScore", "autoStart"], function (config) {
+  document.getElementById("form-autoScoreCheckBox").checked = !!(config.autoScore && config.autoScore.trigger);
+  document.getElementById("form-autoStartCheckBox").checked = !!(config.autoStart && config.autoStart.trigger);
 });
 
-chrome.storage.sync.get(["totalEnterGiveaway"], function(config) {
-  document.getElementById("totalSpan").innerText = config.totalEnterGiveaway;
-})
+// load cumulative joined count
+chrome.storage.sync.get(["totalEnterGiveaway"], function (config) {
+  document.getElementById("totalSpan").innerText = config.totalEnterGiveaway || 0;
+});
 
-document.getElementById('popLinkOptions').addEventListener("click", e => {
-  e.preventDefault();
-  chrome.runtime.openOptionsPage();
-})
+// fetch current SteamGifts points
+fetch('https://www.steamgifts.com/')
+  .then((res) => res.text())
+  .then((html) => {
+    const match = html.match(/<span class="nav__points">(\d+)<\/span>/);
+    document.getElementById("pointSpan").innerText = match ? match[1] : '—';
+  })
+  .catch(() => { document.getElementById("pointSpan").innerText = '—'; });

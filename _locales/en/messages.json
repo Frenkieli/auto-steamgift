@@ -54,5 +54,29 @@
   "formAutoStart": {
     "message": "Automation Enter Giveaway",
     "description": "enter steamGiveaway page auto join the gift to list"
-  }
+  },
+  "popFullAuto": { "message": "Full-Auto Enter Wishlist", "description": "popup full-auto button" },
+  "popFullAutoWarn": { "message": "Overuse may get your account banned. Use with care.", "description": "popup full-auto warning" },
+  "popFullAutoConfirm": { "message": "⚠ Click again to confirm", "description": "popup full-auto armed button label" },
+  "popPoints": { "message": "Current Points", "description": "popup current points label" },
+  "popGoSteam": { "message": "Go to SteamGifts", "description": "popup go to steamgifts button" },
+  "notifyFullAutoDone": { "message": "Auto-entered $COUNT$ wishlist giveaways", "placeholders": { "count": { "content": "$1" } }, "description": "full-auto done notification" },
+  "optTitle": { "message": "Settings", "description": "options page title" },
+  "optWeights": { "message": "Scoring Weights", "description": "options weights section" },
+  "optMinimum": { "message": "Minimum Criteria (skip if not met)", "description": "options minimum section" },
+  "optMinScore": { "message": "Minimum score", "description": "options min score" },
+  "optMinLevel": { "message": "Minimum level", "description": "options min level" },
+  "optRequiredTypes": { "message": "Required types", "description": "options required types" },
+  "optModeAny": { "message": "Match at least one", "description": "options required types any" },
+  "optModeAll": { "message": "Match all", "description": "options required types all" },
+  "optTarget": { "message": "Go to SteamGifts opens", "description": "options target page" },
+  "optTargetWishlist": { "message": "Wishlist search (default)", "description": "options target wishlist" },
+  "optTargetHome": { "message": "Home page", "description": "options target home" },
+  "optTargetReuse": { "message": "Reuse an open SteamGifts tab", "description": "options target reuse" },
+  "optAutomation": { "message": "Automation", "description": "options automation section" },
+  "optPointFloorTitle": { "message": "Entry Behaviour", "description": "options point floor section" },
+  "optPointFloor": { "message": "Stop entering below this many points", "description": "options point floor" },
+  "optData": { "message": "Data", "description": "options data section" },
+  "optResetTotal": { "message": "Reset cumulative count", "description": "options reset total" },
+  "optResetDefault": { "message": "Restore defaults", "description": "options reset defaults" }
 }

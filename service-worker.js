@@ -1,3 +1,16 @@
+let fullAutoRunning = false;
+
+async function ensureOffscreen() {
+  const has = await chrome.offscreen.hasDocument();
+  if (!has) {
+    await chrome.offscreen.createDocument({
+      url: "offscreen.html",
+      reasons: ["DOM_PARSER"],
+      justification: "Fetch and parse the SteamGifts wishlist to auto-enter giveaways in the background."
+    });
+  }
+}
+
 chrome.runtime.onInstalled.addListener(function(details){
   if(details.reason == "install"){
     fetch("defaultSchema.json").then(function (res) {
@@ -53,7 +66,9 @@ chrome.storage.onChanged.addListener((changes, areaName) => {
     }
   }
 
-  if(!(Object.keys(changes).length === 1 &&  changes.totalEnterGiveaway)) {
+  const NO_RELOAD_KEYS = ["totalEnterGiveaway", "fullAutoWarned", "goLinkTarget"];
+  const onlyCosmetic = Object.keys(changes).every((k) => NO_RELOAD_KEYS.includes(k));
+  if(!onlyCosmetic) {
     // 更新重整網站
     chrome.tabs.query({url: "https://www.steamgifts.com/*"}, function (tabs){
       tabs.forEach(tab => {
@@ -67,23 +82,38 @@ chrome.storage.onChanged.addListener((changes, areaName) => {
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   switch (message.type) {
     case "countScoreEnd": {
-      chrome.storage.sync.get(["autoStart"], function(config) {
-        if(config.autoStart.trigger) {
+      chrome.storage.sync.get(["autoStart"], function (config) {
+        if (config.autoStart.trigger) {
           injectAutoScript(sender.tab.id);
         }
       });
       break;
     }
 
-    case "setBadgeText": {
-      chrome.action.setBadgeText({
-        tabId: sender.tab.id,
-        text: message.text
-      });
+    case "fullAutoWishlist": {
+      if (fullAutoRunning) break;
+      fullAutoRunning = true;
+      ensureOffscreen()
+        .then(() => chrome.runtime.sendMessage({ type: "runFullAuto" }))
+        .catch(() => { fullAutoRunning = false; });
+      break;
+    }
 
-      chrome.action.setBadgeBackgroundColor({
-        color: "#583628"
+    case "fullAutoResult": {
+      fullAutoRunning = false;
+      chrome.notifications.create({
+        type: 'basic',
+        iconUrl: "icons/logo.png",
+        title: chrome.i18n.getMessage("extName"),
+        message: chrome.i18n.getMessage("notifyFullAutoDone", [String(message.count)])
       });
+      chrome.offscreen.closeDocument().catch(() => {});
+      break;
+    }
+
+    case "setBadgeText": {
+      chrome.action.setBadgeText({ tabId: sender.tab.id, text: message.text });
+      chrome.action.setBadgeBackgroundColor({ color: "#583628" });
       break;
     }
     default:
@@ -112,7 +142,7 @@ chrome.notifications.onClicked.addListener((notificationId) => {
 function injectAutoScript (tabId) {
   chrome.scripting.executeScript({
     target: { tabId },
-    files: ["content_scripts/autoStart.js"]
+    files: ["content_scripts/giveaway-core.js", "content_scripts/autoStart.js"]
   });
 }
 
@@ -121,7 +151,7 @@ function registerCountScoreContentScripts () {
   .registerContentScripts([{
     id: "countScore-script",
     css: ["content_scripts/countScore.css"],
-    js: ["content_scripts/countScore.js"],
+    js: ["content_scripts/giveaway-core.js", "content_scripts/countScore.js"],
     persistAcrossSessions: false,
     excludeMatches: ["https://www.steamgifts.com/giveaway/*", "https://www.steamgifts.com/user/*", "https://www.steamgifts.com/stats/*"],
     matches: ["https://www.steamgifts.com/*"],

@@ -1,0 +1,11 @@
+* { box-sizing: border-box; }
+body { font-family: system-ui, sans-serif; font-size: 14px; padding: 20px; max-width: 520px; }
+h1 { font-size: 20px; margin-bottom: 16px; }
+section { border: 1px solid #e2e2e2; border-radius: 8px; padding: 14px 16px; margin-bottom: 16px; }
+h2 { font-size: 15px; margin-bottom: 10px; }
+.weight-row { display: grid; grid-template-columns: 24px 1fr 90px; gap: 8px; align-items: center; margin-bottom: 6px; }
+.field { margin-bottom: 8px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.field input[type="number"], select { padding: 4px 6px; }
+.field input[type="number"] { width: 90px; }
+label.inline { display: inline-flex; align-items: center; gap: 4px; }
+button { padding: 8px 12px; margin-right: 8px; cursor: pointer; border: 1px solid #bbb; border-radius: 6px; background: #f6f6f6; }
