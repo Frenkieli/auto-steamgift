@@ -34,7 +34,8 @@ chrome.storage.sync.get(["minScore", "minLevel", "requiredTypes", "pointFloor"],
     giftElements.sort((a, b) => core.getScore(b) - core.getScore(a));
 
     // 2) 依目前點數篩選，扣完不能低於保留點數門檻
-    let myPoint = Number(document.querySelector('.nav__points').innerText);
+    const pointsEl = document.querySelector('.nav__points');
+    let myPoint = pointsEl ? Number(pointsEl.innerText) : 0;
     let countEntryGift = 0;
 
     const readyToEnterGiftElements = giftElements.filter((row) => {
