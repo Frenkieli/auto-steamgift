@@ -1,31 +1,59 @@
+* { padding: 0; margin: 0; box-sizing: border-box; }
+
 body {
-  padding: 8px;
+  padding: 12px;
+  width: 240px;
+  font-family: system-ui, sans-serif;
+  font-size: 14px;
 }
 
-* {
-  padding: 0;
-  margin: 0;
-  line-height: 1em;
+h1 { font-size: 16px; margin-bottom: 10px; }
+
+.full-auto-btn {
+  width: 100%;
+  padding: 10px;
+  font-size: 14px;
+  font-weight: 700;
+  color: #fff;
+  background: #c65a30;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
 }
 
-h2 {
-  margin-top: 5px;
+.warn {
+  font-size: 11px;
+  color: #b25a1f;
+  text-align: center;
+  margin: 6px 0 12px;
 }
 
-form > div {
-  margin-top: 5px;
+.status { display: flex; gap: 8px; margin-bottom: 12px; }
+.status-card { flex: 1; background: #f0f0f0; border-radius: 6px; padding: 6px 8px; }
+.status-label { font-size: 11px; color: #666; }
+.status-value { font-size: 18px; font-weight: 700; }
+
+.toggles { margin-bottom: 12px; }
+.toggle-row {
   display: flex;
+  justify-content: space-between;
   align-items: center;
-  word-break: keep-all;
+  padding: 6px 0;
+  border-top: 1px solid #eee;
+  cursor: pointer;
+}
+.toggle-row:last-child { border-bottom: 1px solid #eee; }
+
+.go-btn {
+  width: 100%;
+  padding: 9px;
+  font-size: 14px;
+  color: #fff;
+  background: #3a8a5f;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
 }
 
-form > div :not(:last-child) {
-  margin-right: 5px;
-}
-form > div :nth-child(2) {
-  margin-left: auto;
-}
-
-form div a {
-  text-decoration: none;
-}
+.footer { text-align: center; margin-top: 12px; }
+.footer a { color: #2b6cb0; text-decoration: none; font-size: 13px; }
