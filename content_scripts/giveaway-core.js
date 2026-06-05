@@ -33,8 +33,7 @@
     getContributorLevel(row) {
       const el = row.querySelector('.giveaway__column--contributor-level');
       if (!el) return 0;
-      const value = Number((el.textContent || '').replace(/[^0-9]/g, ''));
-      return Number.isNaN(value) ? 0 : value;
+      return Number((el.textContent || '').replace(/[^0-9]/g, '')) || 0;
     },
     calculateWeight(row, config) {
       const restricted = config.restricted.trigger && row.querySelector('.giveaway__column--region-restricted')

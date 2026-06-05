@@ -114,3 +114,11 @@ test('getContributorLevel returns 0 when no level column exists', () => {
   const r = rows(loadFixture());
   assert.strictEqual(GiveawayCore.getContributorLevel(r[3]), 0);  // Row D has no level column
 });
+
+test('getContributorLevel handles multi-digit levels', () => {
+  const dom = new (require('jsdom').JSDOM)(
+    '<div class="giveaway__row-inner-wrap"><div class="giveaway__column--contributor-level">Level 10+</div></div>'
+  );
+  const row = dom.window.document.querySelector('.giveaway__row-inner-wrap');
+  assert.strictEqual(GiveawayCore.getContributorLevel(row), 10);
+});
