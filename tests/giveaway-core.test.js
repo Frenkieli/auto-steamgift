@@ -44,3 +44,24 @@ test('extractCode falls back to the heading href when no form input exists', () 
   const row = dom.window.document.querySelector('.giveaway__row-inner-wrap');
   assert.strictEqual(GiveawayCore.extractCode(row), 'zzzzz');
 });
+
+test('isEnterable is true for a fresh, unlocked row', () => {
+  const r = rows(loadFixture());
+  assert.strictEqual(GiveawayCore.isEnterable(r[0]), true);   // Row A
+});
+
+test('isEnterable is false when the insert button is locked', () => {
+  const r = rows(loadFixture());
+  assert.strictEqual(GiveawayCore.isEnterable(r[1]), false);  // Row B is-locked
+});
+
+test('isEnterable is false when the row is already faded (entered)', () => {
+  const r = rows(loadFixture());
+  assert.strictEqual(GiveawayCore.isEnterable(r[2]), false);  // Row C is-faded
+});
+
+test('isEnterable is false when there is no insert button', () => {
+  const dom = new (require('jsdom').JSDOM)('<div class="giveaway__row-inner-wrap"></div>');
+  const row = dom.window.document.querySelector('.giveaway__row-inner-wrap');
+  assert.strictEqual(GiveawayCore.isEnterable(row), false);
+});

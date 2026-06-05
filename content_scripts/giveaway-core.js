@@ -18,7 +18,12 @@
       const match = (link.getAttribute('href') || '').match(/\/giveaway\/([^/]+)/);
       return match ? match[1] : null;
     },
-    isEnterable(row) { return false; },
+    isEnterable(row) {
+      if (row.classList.contains('is-faded')) return false;
+      const insert = row.querySelector('.giveaway__quick-entry-btn--insert');
+      if (!insert) return false;
+      return !insert.classList.contains('is-locked');
+    },
     getScore(row) { return 0; },
     calculateWeight(row, config) { return 0; },
   };
