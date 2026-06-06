@@ -97,9 +97,14 @@
   async function enterGiveaway(row) {
     await unlockIfNeeded(row);
 
-    // 點開描述後的閱讀停留（gated 才有 description-panel，是 row-inner-wrap 的兄弟節點）
+    // 點開描述後的閱讀停留：仿 Humanize.readingDelayMs（~300wpm 略讀 + 變異），夾 [1500,15000]
     const panel = row.parentNode.querySelector('.giveaway__description-panel');
-    if (panel) await delay(Math.min(15000, 1500 + (panel.textContent || '').length));
+    if (panel) {
+      const words = (panel.textContent || '').length / 5;
+      const variance = 0.7 + Math.random() * 0.6; // 0.7..1.3
+      const readMs = 1200 + (words / 300) * 60000 * variance;
+      await delay(Math.round(Math.min(15000, Math.max(1500, readMs))));
+    }
 
     const insertBtn = row.querySelector('.giveaway__quick-entry-btn--insert');
     if (!insertBtn || insertBtn.classList.contains('is-locked')) throw new Error('not enterable');
@@ -138,7 +143,7 @@
       } catch (e) {
         giftCardUiChange({ cardElement: row, text: CARD_TEXT.Fail, ...CARD_STATE.Fail });
       }
-      await delay(rand(4000, 12000)); // 抽取間的擬人化間隔
+      if (row !== list[list.length - 1]) await delay(rand(4000, 12000)); // 抽取間的擬人化間隔（最後一筆不等待）
     }
     alert(`Enter Giveaway:${countEntryGift}`);
   }
