@@ -11,8 +11,8 @@ chrome.runtime.onMessage.addListener((message) => {
     .catch(() => chrome.runtime.sendMessage({ type: "fullAutoResult", count: 0 }));
 });
 
-async function enterOne(code, xsrf) {
-  const body = new URLSearchParams({ xsrf_token: xsrf, do: "entry_insert", code });
+async function postAjax(doValue, code, xsrf) {
+  const body = new URLSearchParams({ xsrf_token: xsrf, do: doValue, code });
   try {
     const res = await fetch(ENTRY_URL, {
       method: "POST",
@@ -29,6 +29,9 @@ async function enterOne(code, xsrf) {
     return false;
   }
 }
+
+const enterOne = (code, xsrf) => postAjax("entry_insert", code, xsrf);
+const viewDescription = (code, xsrf) => postAjax("giveaway_description", code, xsrf);
 
 async function runFullAuto() {
   const cfg = await chrome.storage.sync.get([
@@ -74,6 +77,10 @@ async function runFullAuto() {
     if (myPoint - cost < pointFloor) continue;
     const code = core.extractCode(row);
     if (!code) continue;
+    if (core.isDescriptionGated(row)) {
+      await viewDescription(code, xsrf);
+      await delayRandom();
+    }
     const ok = await enterOne(code, xsrf);
     if (ok) {
       myPoint -= cost;
