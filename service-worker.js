@@ -1,3 +1,15 @@
+importScripts('lib/serial-counter.js');
+
+// 序列化計數器：所有計數寫入都經由單一 SW 串行化，杜絕多分頁同時 +1 的競態。
+const joinCounter = self.SerialCounter.createSerialCounter({
+  get: (key) => new Promise((res) => chrome.storage.local.get([key], (o) => res(o[key] || 0))),
+  set: (key, value) => new Promise((res) => chrome.storage.local.set({ [key]: value }, res)),
+});
+const totalCounter = self.SerialCounter.createSerialCounter({
+  get: (key) => new Promise((res) => chrome.storage.sync.get([key], (o) => res(o[key] || 0))),
+  set: (key, value) => new Promise((res) => chrome.storage.sync.set({ [key]: value }, res)),
+});
+
 let fullAutoRunning = false;
 
 const FULL_AUTO_CFG_KEYS = [
@@ -205,12 +217,8 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       if (message.loggedIn != null) chrome.storage.local.set({ loggedIn: message.loggedIn });
       if (message.point != null) storePoints(message.point);
       if (message.count > 0) {
-        chrome.storage.sync.get(["totalEnterGiveaway"], (c) => {
-          chrome.storage.sync.set({ totalEnterGiveaway: (c.totalEnterGiveaway || 0) + message.count });
-        });
-        chrome.storage.local.get(["autoJoinCount"], (s) => {
-          chrome.storage.local.set({ autoJoinCount: (s.autoJoinCount || 0) + message.count });
-        });
+        totalCounter.increment("totalEnterGiveaway", message.count);
+        joinCounter.increment("autoJoinCount", message.count);
       }
       chrome.notifications.create({
         type: 'basic',
@@ -225,6 +233,12 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     case "setBadgeText": {
       chrome.action.setBadgeText({ tabId: sender.tab.id, text: message.text });
       chrome.action.setBadgeBackgroundColor({ color: "#583628" });
+      break;
+    }
+    case "enterCommitted": {
+      // 安全模式每抽中一筆就送一次；SW 串行化寫入今日計數與累計計數。
+      joinCounter.increment("autoJoinCount", 1);
+      totalCounter.increment("totalEnterGiveaway", 1);
       break;
     }
     default:
