@@ -7,9 +7,56 @@ const WEIGHT_DEFAULTS = {
   cost: { trigger: true, value: 1 }
 };
 
+// 擬人化欄位：id=UI 元素、key=storage 欄位、kind=單位換算（sec=秒↔ms, pct=%↔小數, num=原值）
+const HUMANIZE_FIELDS = [
+  { id: "hz-delayMedian", key: "delayMedian", kind: "sec" },
+  { id: "hz-delayMin", key: "delayMin", kind: "sec" },
+  { id: "hz-delayMax", key: "delayMax", kind: "sec" },
+  { id: "hz-delaySigma", key: "delaySigma", kind: "num" },
+  { id: "hz-readWpm", key: "readWpm", kind: "num" },
+  { id: "hz-readBase", key: "readBase", kind: "sec" },
+  { id: "hz-readMin", key: "readMin", kind: "sec" },
+  { id: "hz-readMax", key: "readMax", kind: "sec" },
+  { id: "hz-breakProb", key: "breakProb", kind: "pct" },
+  { id: "hz-breakMin", key: "breakMin", kind: "sec" },
+  { id: "hz-breakMax", key: "breakMax", kind: "sec" },
+  { id: "hz-earlyStopProb", key: "earlyStopProb", kind: "pct" },
+  { id: "hz-capMin", key: "capMin", kind: "num" },
+  { id: "hz-capMax", key: "capMax", kind: "num" }
+];
+
+// canonical(ms / 0–1 小數) → 顯示值（秒 / % / 原值）
+function hzToDisplay(value, kind) {
+  if (kind === "sec") return value / 1000;
+  if (kind === "pct") return Math.round(value * 100);
+  return value;
+}
+// 顯示值 → canonical
+function hzToStored(input, kind) {
+  const n = Number(input) || 0;
+  if (kind === "sec") return Math.round(n * 1000);
+  if (kind === "pct") return n / 100;
+  return n;
+}
+
+function loadHumanize(stored) {
+  const hz = window.Humanize.resolveConfig(stored || {});
+  HUMANIZE_FIELDS.forEach((f) => {
+    document.getElementById(f.id).value = hzToDisplay(hz[f.key], f.kind);
+  });
+}
+
+function saveHumanize() {
+  const obj = {};
+  HUMANIZE_FIELDS.forEach((f) => {
+    obj[f.key] = hzToStored(document.getElementById(f.id).value, f.kind);
+  });
+  chrome.storage.sync.set({ humanizeConfig: obj });
+}
+
 function load() {
   chrome.storage.sync.get(
-    [...WEIGHT_KEYS, "autoScore", "autoStart", "minScore", "minLevel", "requiredTypes", "pointFloor", "goLinkTarget", "activeHours", "aggressiveMode"],
+    [...WEIGHT_KEYS, "autoScore", "autoStart", "minScore", "minLevel", "requiredTypes", "pointFloor", "goLinkTarget", "activeHours", "aggressiveMode", "humanizeConfig"],
     function (cfg) {
       WEIGHT_KEYS.forEach((k) => {
         const w = cfg[k] || WEIGHT_DEFAULTS[k];
@@ -31,6 +78,7 @@ function load() {
       document.getElementById("activeStart").value = minToHHMM(ah.start);
       document.getElementById("activeEnd").value = minToHHMM(ah.end);
       document.getElementById("opt-aggressive").checked = !!(cfg.aggressiveMode && cfg.aggressiveMode.trigger);
+      loadHumanize(cfg.humanizeConfig);
     }
   );
 }
@@ -100,6 +148,10 @@ document.getElementById("activeStart").addEventListener("change", saveActiveHour
 document.getElementById("activeEnd").addEventListener("change", saveActiveHours);
 document.getElementById("opt-aggressive").addEventListener("change", (e) =>
   chrome.storage.sync.set({ aggressiveMode: { trigger: e.target.checked } }));
+
+HUMANIZE_FIELDS.forEach((f) => {
+  document.getElementById(f.id).addEventListener("change", saveHumanize);
+});
 
 document.getElementById("resetTotal").addEventListener("click", () => {
   chrome.storage.sync.set({ totalEnterGiveaway: 0 });
