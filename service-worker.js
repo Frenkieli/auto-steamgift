@@ -6,7 +6,30 @@ const FULL_AUTO_CFG_KEYS = [
 ];
 
 const HOME_URL = "https://www.steamgifts.com/";
+const WISHLIST_URL = "https://www.steamgifts.com/giveaways/search?type=wishlist";
 const POINT_TTL_MS = 6 * 60 * 60 * 1000; // 6 小時
+
+// 與 content_scripts/humanize.js 同邏輯的精簡版（SW 無法載入 window 版的 humanize）
+function inActiveHours(date, startMin, endMin) {
+  const mins = date.getHours() * 60 + date.getMinutes();
+  if (startMin === endMin) return true;
+  if (startMin < endMin) return mins >= startMin && mins < endMin;
+  return mins >= startMin || mins < endMin; // 跨午夜
+}
+function pickDailyCap(min = 50, max = 58) {
+  return min + Math.floor(Math.random() * (max - min + 1));
+}
+// 安全模式：開或聚焦願望清單分頁（頁內擬人化 autoStart 會處理加入）
+function openWishlistTab() {
+  chrome.tabs.query({ url: "https://www.steamgifts.com/giveaways/search?type=wishlist*" }, (tabs) => {
+    if (tabs.length > 0) {
+      chrome.tabs.update(tabs[0].id, { active: true });
+      chrome.tabs.reload(tabs[0].id);
+    } else {
+      chrome.tabs.create({ url: WISHLIST_URL });
+    }
+  });
+}
 
 // 寫入點數快取（供免費更新來源使用）
 function storePoints(point) {
@@ -141,14 +164,35 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     }
 
     case "fullAutoWishlist": {
-      if (fullAutoRunning) break;
-      fullAutoRunning = true;
-      chrome.storage.local.set({ fullAutoRunning: true }); // 供 popup 顯示 loading
-      // offscreen 文件拿不到 chrome.storage，所以由 SW 讀設定後用訊息帶過去
-      chrome.storage.sync.get(FULL_AUTO_CFG_KEYS, (cfg) => {
-        ensureOffscreen()
-          .then(() => chrome.runtime.sendMessage({ type: "runFullAuto", cfg }))
-          .catch(() => { fullAutoRunning = false; chrome.storage.local.set({ fullAutoRunning: false }); });
+      chrome.storage.sync.get([...FULL_AUTO_CFG_KEYS, "aggressiveMode", "activeHours"], (cfg) => {
+        const aggressive = !!(cfg.aggressiveMode && cfg.aggressiveMode.trigger);
+        if (!aggressive) {
+          openWishlistTab(); // 安全模式：開願望清單分頁，由頁內擬人化 autoStart 處理
+          return;
+        }
+        // 激進模式：背景 offscreen，受活躍時段與每日預算限制
+        const ah = cfg.activeHours || { start: 600, end: 120 };
+        if (!inActiveHours(new Date(), ah.start, ah.end)) return; // 非活躍時段不跑
+        if (fullAutoRunning) return;
+        chrome.storage.local.get(["autoJoinDate", "autoJoinCount", "autoJoinCap"], (b) => {
+          const today = new Date().toLocaleDateString('en-CA');
+          let count = 0;
+          let cap;
+          if (b.autoJoinDate === today && b.autoJoinCap != null) {
+            count = b.autoJoinCount || 0;
+            cap = b.autoJoinCap;
+          } else {
+            cap = pickDailyCap();
+            chrome.storage.local.set({ autoJoinDate: today, autoJoinCount: 0, autoJoinCap: cap });
+          }
+          const remaining = Math.max(0, cap - count);
+          if (remaining <= 0) return; // 今日額度用完
+          fullAutoRunning = true;
+          chrome.storage.local.set({ fullAutoRunning: true }); // 供 popup 顯示 loading
+          ensureOffscreen()
+            .then(() => chrome.runtime.sendMessage({ type: "runFullAuto", cfg, maxEntries: remaining }))
+            .catch(() => { fullAutoRunning = false; chrome.storage.local.set({ fullAutoRunning: false }); });
+        });
       });
       break;
     }
@@ -161,6 +205,9 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       if (message.count > 0) {
         chrome.storage.sync.get(["totalEnterGiveaway"], (c) => {
           chrome.storage.sync.set({ totalEnterGiveaway: (c.totalEnterGiveaway || 0) + message.count });
+        });
+        chrome.storage.local.get(["autoJoinCount"], (s) => {
+          chrome.storage.local.set({ autoJoinCount: (s.autoJoinCount || 0) + message.count });
         });
       }
       chrome.notifications.create({

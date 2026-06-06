@@ -32,5 +32,6 @@
   "pointFloor": 0,
   "goLinkTarget": "wishlist",
   "fullAutoWarned": false,
-  "activeHours": { "start": 600, "end": 120 }
+  "activeHours": { "start": 600, "end": 120 },
+  "aggressiveMode": { "trigger": false }
 }
