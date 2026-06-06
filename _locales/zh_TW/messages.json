@@ -80,6 +80,8 @@
   "optTargetReuse": { "message": "沿用已開的 SteamGifts 分頁", "description": "目標頁沿用分頁" },
   "optAutomation": { "message": "自動化", "description": "設定頁自動化區塊" },
   "optActiveHours": { "message": "自動加入時段（跨午夜可設定如 10:00–02:00）", "description": "設定頁活躍時段" },
+  "optAggressive": { "message": "激進模式：背景全自動（風險較高）", "description": "設定頁激進模式開關" },
+  "optAggressiveWarn": { "message": "背景直接連續送出加入請求、無頁面瀏覽，結構上較易被偵測。預設關閉；一般請用安全模式（開願望清單分頁、頁內擬人化加入）。", "description": "設定頁激進模式警告" },
   "optPointFloorTitle": { "message": "抽取行為", "description": "設定頁抽取行為區塊" },
   "optPointFloor": { "message": "低於此點數就停止抽取", "description": "設定頁保留點數門檻" },
   "optData": { "message": "資料", "description": "設定頁資料區塊" },

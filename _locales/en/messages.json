@@ -80,6 +80,8 @@
   "optTargetReuse": { "message": "Reuse an open SteamGifts tab", "description": "options target reuse" },
   "optAutomation": { "message": "Automation", "description": "options automation section" },
   "optActiveHours": { "message": "Auto-join hours (may wrap midnight, e.g. 10:00–02:00)", "description": "options active hours" },
+  "optAggressive": { "message": "Aggressive mode: background full-auto (higher risk)", "description": "options aggressive mode toggle" },
+  "optAggressiveWarn": { "message": "The background path fires entries directly with no page views, which is structurally easier to detect. Off by default; normally use safe mode (open the wishlist tab, humanized in-page entering).", "description": "options aggressive mode warning" },
   "optPointFloorTitle": { "message": "Entry Behaviour", "description": "options point floor section" },
   "optPointFloor": { "message": "Stop entering below this many points", "description": "options point floor" },
   "optData": { "message": "Data", "description": "options data section" },

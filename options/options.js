@@ -9,7 +9,7 @@ const WEIGHT_DEFAULTS = {
 
 function load() {
   chrome.storage.sync.get(
-    [...WEIGHT_KEYS, "autoScore", "autoStart", "minScore", "minLevel", "requiredTypes", "pointFloor", "goLinkTarget", "activeHours"],
+    [...WEIGHT_KEYS, "autoScore", "autoStart", "minScore", "minLevel", "requiredTypes", "pointFloor", "goLinkTarget", "activeHours", "aggressiveMode"],
     function (cfg) {
       WEIGHT_KEYS.forEach((k) => {
         const w = cfg[k] || WEIGHT_DEFAULTS[k];
@@ -30,6 +30,7 @@ function load() {
       const ah = cfg.activeHours || { start: 600, end: 120 };
       document.getElementById("activeStart").value = minToHHMM(ah.start);
       document.getElementById("activeEnd").value = minToHHMM(ah.end);
+      document.getElementById("opt-aggressive").checked = !!(cfg.aggressiveMode && cfg.aggressiveMode.trigger);
     }
   );
 }
@@ -97,6 +98,8 @@ document.getElementById("opt-autoStart").addEventListener("change", (e) =>
   chrome.storage.sync.set({ autoStart: { trigger: e.target.checked } }));
 document.getElementById("activeStart").addEventListener("change", saveActiveHours);
 document.getElementById("activeEnd").addEventListener("change", saveActiveHours);
+document.getElementById("opt-aggressive").addEventListener("change", (e) =>
+  chrome.storage.sync.set({ aggressiveMode: { trigger: e.target.checked } }));
 
 document.getElementById("resetTotal").addEventListener("click", () => {
   chrome.storage.sync.set({ totalEnterGiveaway: 0 });
