@@ -1,5 +1,10 @@
 let fullAutoRunning = false;
 
+const FULL_AUTO_CFG_KEYS = [
+  "restricted", "whitelist", "group", "level", "cost",
+  "minScore", "minLevel", "requiredTypes", "pointFloor"
+];
+
 async function ensureOffscreen() {
   const has = await chrome.offscreen.hasDocument();
   if (!has) {
@@ -93,14 +98,22 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     case "fullAutoWishlist": {
       if (fullAutoRunning) break;
       fullAutoRunning = true;
-      ensureOffscreen()
-        .then(() => chrome.runtime.sendMessage({ type: "runFullAuto" }))
-        .catch(() => { fullAutoRunning = false; });
+      // offscreen 文件拿不到 chrome.storage，所以由 SW 讀設定後用訊息帶過去
+      chrome.storage.sync.get(FULL_AUTO_CFG_KEYS, (cfg) => {
+        ensureOffscreen()
+          .then(() => chrome.runtime.sendMessage({ type: "runFullAuto", cfg }))
+          .catch(() => { fullAutoRunning = false; });
+      });
       break;
     }
 
     case "fullAutoResult": {
       fullAutoRunning = false;
+      if (message.count > 0) {
+        chrome.storage.sync.get(["totalEnterGiveaway"], (c) => {
+          chrome.storage.sync.set({ totalEnterGiveaway: (c.totalEnterGiveaway || 0) + message.count });
+        });
+      }
       chrome.notifications.create({
         type: 'basic',
         iconUrl: "icons/logo.png",
