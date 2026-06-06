@@ -9,7 +9,7 @@ const WEIGHT_DEFAULTS = {
 
 function load() {
   chrome.storage.sync.get(
-    [...WEIGHT_KEYS, "autoScore", "autoStart", "minScore", "minLevel", "requiredTypes", "pointFloor", "goLinkTarget"],
+    [...WEIGHT_KEYS, "autoScore", "autoStart", "minScore", "minLevel", "requiredTypes", "pointFloor", "goLinkTarget", "activeHours"],
     function (cfg) {
       WEIGHT_KEYS.forEach((k) => {
         const w = cfg[k] || WEIGHT_DEFAULTS[k];
@@ -27,8 +27,31 @@ function load() {
       document.getElementById("goLinkTarget").value = cfg.goLinkTarget || "wishlist";
       document.getElementById("opt-autoScore").checked = !!(cfg.autoScore && cfg.autoScore.trigger);
       document.getElementById("opt-autoStart").checked = !!(cfg.autoStart && cfg.autoStart.trigger);
+      const ah = cfg.activeHours || { start: 600, end: 120 };
+      document.getElementById("activeStart").value = minToHHMM(ah.start);
+      document.getElementById("activeEnd").value = minToHHMM(ah.end);
     }
   );
+}
+
+function minToHHMM(min) {
+  const h = String(Math.floor(((min % 1440) + 1440) % 1440 / 60)).padStart(2, "0");
+  const m = String(((min % 60) + 60) % 60).padStart(2, "0");
+  return `${h}:${m}`;
+}
+
+function hhmmToMin(v) {
+  const [h, m] = (v || "0:0").split(":").map(Number);
+  return (h || 0) * 60 + (m || 0);
+}
+
+function saveActiveHours() {
+  chrome.storage.sync.set({
+    activeHours: {
+      start: hhmmToMin(document.getElementById("activeStart").value),
+      end: hhmmToMin(document.getElementById("activeEnd").value)
+    }
+  });
 }
 
 function saveWeight(key) {
@@ -72,6 +95,8 @@ document.getElementById("opt-autoScore").addEventListener("change", (e) =>
   chrome.storage.sync.set({ autoScore: { trigger: e.target.checked } }));
 document.getElementById("opt-autoStart").addEventListener("change", (e) =>
   chrome.storage.sync.set({ autoStart: { trigger: e.target.checked } }));
+document.getElementById("activeStart").addEventListener("change", saveActiveHours);
+document.getElementById("activeEnd").addEventListener("change", saveActiveHours);
 
 document.getElementById("resetTotal").addEventListener("click", () => {
   chrome.storage.sync.set({ totalEnterGiveaway: 0 });

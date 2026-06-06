@@ -31,5 +31,6 @@
   "requiredTypes": { "restricted": false, "whitelist": false, "group": false, "mode": "any" },
   "pointFloor": 0,
   "goLinkTarget": "wishlist",
-  "fullAutoWarned": false
+  "fullAutoWarned": false,
+  "activeHours": { "start": 600, "end": 120 }
 }

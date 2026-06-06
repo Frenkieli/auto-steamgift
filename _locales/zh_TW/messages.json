@@ -78,6 +78,7 @@
   "optTargetHome": { "message": "首頁", "description": "目標頁首頁" },
   "optTargetReuse": { "message": "沿用已開的 SteamGifts 分頁", "description": "目標頁沿用分頁" },
   "optAutomation": { "message": "自動化", "description": "設定頁自動化區塊" },
+  "optActiveHours": { "message": "自動加入時段（跨午夜可設定如 10:00–02:00）", "description": "設定頁活躍時段" },
   "optPointFloorTitle": { "message": "抽取行為", "description": "設定頁抽取行為區塊" },
   "optPointFloor": { "message": "低於此點數就停止抽取", "description": "設定頁保留點數門檻" },
   "optData": { "message": "資料", "description": "設定頁資料區塊" },
