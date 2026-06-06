@@ -11,23 +11,59 @@ document.getElementById("form-autoStartCheckBox")
   .addEventListener("change", (e) => setTrigger("autoStart", e.target.checked));
 
 const fullAutoBtn = document.getElementById("fullAutoBtn");
+const loginBanner = document.getElementById("loginBanner");
+const recheckLoginBtn = document.getElementById("recheckLoginBtn");
 let fullAutoArmed = false;
+let isRunning = false;
+let loggedOut = false;
 
-function setFullAutoLoading(running) {
-  fullAutoBtn.disabled = running;
-  fullAutoBtn.classList.toggle("is-loading", running);
-  fullAutoBtn.textContent = chrome.i18n.getMessage(running ? "popFullAutoRunning" : "popFullAuto");
+function renderFullAutoBtn() {
+  fullAutoBtn.disabled = isRunning || loggedOut;
+  fullAutoBtn.classList.toggle("is-loading", isRunning);
+  fullAutoBtn.textContent = chrome.i18n.getMessage(isRunning ? "popFullAutoRunning" : "popFullAuto");
 }
 
-// 開啟 popup 時反映目前是否正在抽取
-chrome.storage.local.get(["fullAutoRunning"], (s) => setFullAutoLoading(!!s.fullAutoRunning));
+function renderLoginBanner() {
+  loginBanner.style.display = loggedOut ? "" : "none";
+}
 
-// 抽取狀態變化時即時更新（完成通知後 SW 會把旗標設為 false → 解除 loading）
+// 開啟 popup 時反映目前的抽取/登入狀態
+chrome.storage.local.get(["fullAutoRunning", "loggedIn"], (s) => {
+  isRunning = !!s.fullAutoRunning;
+  loggedOut = s.loggedIn === false;
+  renderFullAutoBtn();
+  renderLoginBanner();
+});
+
+// 狀態變化即時更新
 chrome.storage.onChanged.addListener((changes, area) => {
-  if (area === "local" && changes.fullAutoRunning) {
+  if (area !== "local") return;
+  if (changes.fullAutoRunning) {
+    isRunning = !!changes.fullAutoRunning.newValue;
     fullAutoArmed = false;
-    setFullAutoLoading(!!changes.fullAutoRunning.newValue);
+    renderFullAutoBtn();
   }
+  if (changes.loggedIn) {
+    loggedOut = changes.loggedIn.newValue === false;
+    renderFullAutoBtn();
+    renderLoginBanner();
+  }
+});
+
+// 「我已登入，重新檢查」→ 強制抓一次（繞過 6h 閘門）
+recheckLoginBtn.addEventListener("click", () => {
+  recheckLoginBtn.disabled = true;
+  recheckLoginBtn.textContent = chrome.i18n.getMessage("popRecheckLoginChecking");
+  chrome.runtime.sendMessage({ type: "forceLoginCheck" }, (resp) => {
+    recheckLoginBtn.disabled = false;
+    recheckLoginBtn.textContent = chrome.i18n.getMessage("popRecheckLogin");
+    // 直接套用回應（涵蓋「值沒變、onChanged 不觸發」的情況）；null=fetch 失敗，維持原樣
+    if (resp && resp.loggedIn != null) {
+      loggedOut = resp.loggedIn === false;
+      renderFullAutoBtn();
+      renderLoginBanner();
+    }
+  });
 });
 
 fullAutoBtn.addEventListener("click", () => {
@@ -40,7 +76,8 @@ fullAutoBtn.addEventListener("click", () => {
     }
     chrome.storage.sync.set({ fullAutoWarned: true });
     chrome.runtime.sendMessage({ type: "fullAutoWishlist" });
-    setFullAutoLoading(true); // 立即回饋；保持 popup 開著，不關閉
+    isRunning = true;
+    renderFullAutoBtn(); // 立即回饋；保持 popup 開著
   });
 });
 
