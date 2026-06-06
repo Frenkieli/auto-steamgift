@@ -2,10 +2,11 @@
   // 每個可調參數的預設值（canonical 單位：ms / 0–1 小數 / 原始整數）。
   const DEFAULTS = {
     delayMedian: 4000, delaySigma: 0.6, delayMin: 2000, delayMax: 30000,
-    readWpm: 1000, readBase: 200, readMin: 400, readMax: 1500,
+    readWpm: 1000, readBase: 200, readMin: 500, readMax: 1000,
     breakProb: 0.15, breakMin: 60000, breakMax: 300000,
     earlyStopProb: 0.10,
-    capMin: 50, capMax: 58
+    capMin: 50, capMax: 58,
+    readingEnabled: false
   };
   // 每個參數的允許範圍 [lo, hi]；讀取時夾限，防止關閉反偵測或卡死。
   const BOUNDS = {
@@ -28,9 +29,11 @@
     const r = raw || {};
     const out = {};
     for (const key in DEFAULTS) {
+      if (!(key in BOUNDS)) continue; // 非數值參數（如 readingEnabled）另外處理
       const [lo, hi] = BOUNDS[key];
       out[key] = clampNum(r[key], lo, hi, DEFAULTS[key]);
     }
+    out.readingEnabled = r.readingEnabled === true; // 布林開關，預設 false
     // 確保每組 min <= max（避免區間反轉產生怪異結果）
     if (out.delayMax < out.delayMin) out.delayMax = out.delayMin;
     if (out.readMax < out.readMin) out.readMax = out.readMin;
@@ -56,6 +59,7 @@
   // 點開描述後的閱讀停留：依字數（textLen/5 詞）以略讀 readWpm + 變異，夾 [readMin, readMax]
   function readingDelayMs(textLen, cfg = {}, rng = Math.random) {
     const c = resolveConfig(cfg);
+    if (!c.readingEnabled) return 0; // 預設不模擬閱讀，點開描述後立即進行
     const words = textLen / 5;
     const variance = 0.7 + rng() * 0.6; // 0.7..1.3
     const ms = c.readBase + (words / c.readWpm) * 60000 * variance;

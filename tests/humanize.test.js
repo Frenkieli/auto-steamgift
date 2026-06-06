@@ -52,21 +52,36 @@ test('humanDelayMs always stays within default [2000, 30000]', () => {
 
 // ---- readingDelayMs ----
 
-test('readingDelayMs grows with description length', () => {
+test('readingDelayMs grows with description length (when enabled)', () => {
+  // readMin 500 / readMax 1000; variance 1.0 (rng 0.5): 30 chars ~560ms, 50 chars ~800ms (neither clamps).
   const r = () => 0.5;
-  assert.ok(Humanize.readingDelayMs(1000, {}, r) > Humanize.readingDelayMs(100, {}, r));
+  const cfg = { readingEnabled: true };
+  assert.ok(Humanize.readingDelayMs(50, cfg, r) > Humanize.readingDelayMs(30, cfg, r));
 });
 
-test('readingDelayMs is clamped to default [400, 1500]', () => {
-  assert.ok(Humanize.readingDelayMs(0, {}, () => 0.5) >= 400);
-  assert.ok(Humanize.readingDelayMs(1000000, {}, () => 0.5) <= 1500);
+test('readingDelayMs is clamped to [500, 1000] when enabled', () => {
+  assert.ok(Humanize.readingDelayMs(0, { readingEnabled: true }, () => 0.5) >= 500);
+  assert.ok(Humanize.readingDelayMs(1000000, { readingEnabled: true }, () => 0.5) <= 1000);
 });
 
-test('readingDelayMs slower wpm yields a longer stay', () => {
-  // Use a short description + high wpm so neither result clamps to readMax (1500):
-  // 50 chars = 10 words -> 600wpm ~1200ms, 1000wpm ~800ms (readBase 200, variance 1.0).
+test('readingDelayMs slower wpm yields a longer stay (when enabled)', () => {
+  // 50 chars = 10 words, readBase 200, variance 1.0, cap 1000:
+  // 800wpm ~950ms, 1000wpm ~800ms — neither clamps.
   const r = () => 0.5;
-  assert.ok(Humanize.readingDelayMs(50, { readWpm: 600 }, r) > Humanize.readingDelayMs(50, { readWpm: 1000 }, r));
+  assert.ok(
+    Humanize.readingDelayMs(50, { readingEnabled: true, readWpm: 800 }, r) >
+    Humanize.readingDelayMs(50, { readingEnabled: true, readWpm: 1000 }, r)
+  );
+});
+
+test('readingDelayMs returns 0 when reading is disabled (default)', () => {
+  assert.strictEqual(Humanize.readingDelayMs(500, {}, () => 0.5), 0);
+});
+
+test('resolveConfig defaults readingEnabled to false and only true enables it', () => {
+  assert.strictEqual(Humanize.resolveConfig({}).readingEnabled, false);
+  assert.strictEqual(Humanize.resolveConfig({ readingEnabled: true }).readingEnabled, true);
+  assert.strictEqual(Humanize.resolveConfig({ readingEnabled: 'yes' }).readingEnabled, false);
 });
 
 // ---- maybeBreakMs ----
