@@ -6,7 +6,7 @@ const delay = (ms) => new Promise((r) => setTimeout(r, ms));
 chrome.runtime.onMessage.addListener((message) => {
   if (message.type !== "runFullAuto") return;
   runFullAuto(message.cfg || {}, message.maxEntries || 0)
-    .then(({ count, point, loggedIn }) => chrome.runtime.sendMessage({ type: "fullAutoResult", count, point, loggedIn }))
+    .then(({ count, point, loggedIn, entries }) => chrome.runtime.sendMessage({ type: "fullAutoResult", count, point, loggedIn, entries }))
     .catch(() => chrome.runtime.sendMessage({ type: "fullAutoResult", count: 0 }));
 });
 
@@ -75,6 +75,7 @@ async function runFullAuto(cfg, maxEntries) {
 
   const pointFloor = Number(cfg.pointFloor) || 0;
   let count = 0;
+  const entries = [];
 
   for (const row of eligible) {
     if (count >= maxEntries) break; // 每日額度上限
@@ -91,9 +92,14 @@ async function runFullAuto(cfg, maxEntries) {
       myPoint -= cost;
       count++;
     }
+    const nameLink = row.querySelector('.giveaway__heading__name');
+    const name = nameLink ? nameLink.textContent.trim() : "";
+    const path = nameLink ? nameLink.getAttribute('href') : "";
+    const url = path ? new URL(path, "https://www.steamgifts.com").href : "";
+    entries.push({ name, url, points: ok ? cost : 0, result: ok ? "success" : "fail", time: Date.now() });
     await delay(human.humanDelayMs(hcfg));
     const breakMs = human.maybeBreakMs(hcfg);
     if (breakMs) await delay(breakMs);
   }
-  return { count, point: myPoint, loggedIn: true };
+  return { count, point: myPoint, loggedIn: true, entries };
 }
