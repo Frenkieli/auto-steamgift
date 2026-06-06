@@ -13,9 +13,17 @@ document.getElementById("form-autoStartCheckBox")
 const fullAutoBtn = document.getElementById("fullAutoBtn");
 const loginBanner = document.getElementById("loginBanner");
 const recheckLoginBtn = document.getElementById("recheckLoginBtn");
+const aggressiveWarn = document.getElementById("aggressiveWarn");
 let fullAutoArmed = false;
 let isRunning = false;
 let loggedOut = false;
+let aggressive = false;
+
+// 讀取激進模式，顯示警告
+chrome.storage.sync.get(["aggressiveMode"], (s) => {
+  aggressive = !!(s.aggressiveMode && s.aggressiveMode.trigger);
+  aggressiveWarn.style.display = aggressive ? "" : "none";
+});
 
 function renderFullAutoBtn() {
   fullAutoBtn.disabled = isRunning || loggedOut;
@@ -77,6 +85,13 @@ recheckLoginBtn.addEventListener("click", () => {
 
 fullAutoBtn.addEventListener("click", () => {
   if (fullAutoBtn.disabled) return;
+  if (!aggressive) {
+    // 安全模式：請 SW 開願望清單分頁，由頁內擬人化 autoStart 處理
+    chrome.runtime.sendMessage({ type: "fullAutoWishlist" });
+    window.close();
+    return;
+  }
+  // 激進模式：背景全自動，保留兩段式警告與 loading
   chrome.storage.sync.get(["fullAutoWarned"], (cfg) => {
     if (!cfg.fullAutoWarned && !fullAutoArmed) {
       fullAutoArmed = true;
