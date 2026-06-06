@@ -92,6 +92,10 @@ chrome.storage.onChanged.addListener((changes, areaName) => {
     }
   }
 
+  // 只有設定（sync）變更才需要重整頁面；點數快取等 local 變更不可觸發 reload，
+  // 否則 readPoints 每次載入就寫 local → onChanged → reload → 無限迴圈。
+  if (areaName !== "sync") return;
+
   const NO_RELOAD_KEYS = ["totalEnterGiveaway", "fullAutoWarned", "goLinkTarget"];
   const onlyCosmetic = Object.keys(changes).every((k) => NO_RELOAD_KEYS.includes(k));
   if(!onlyCosmetic) {

@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "__MSG_extName__",
   "description": "__MSG_extDescription__",
-  "version": "1.3",
+  "version": "1.2",
   "background": {
     "service_worker": "service-worker.js"
   },
@@ -20,13 +20,7 @@
     "48": "icons/icon-48.png",
     "128": "icons/icon-128.png"
   },
-  "permissions": [
-    "storage",
-    "scripting",
-    "tabs",
-    "notifications",
-    "offscreen"
-  ],
+  "permissions": ["storage", "scripting", "tabs", "notifications", "offscreen"],
   "storage": {
     "managed_schema": "schema.json"
   },
@@ -35,7 +29,5 @@
     "default_popup": "popup/popup.html"
   },
   "default_locale": "zh_TW",
-  "host_permissions": [
-    "*://www.steamgifts.com/*"
-  ]
+  "host_permissions": ["*://www.steamgifts.com/*"]
 }
