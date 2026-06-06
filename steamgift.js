@@ -31,7 +31,9 @@
   function isEnterable(row) {
     if (row.classList.contains('is-faded')) return false;
     const insert = row.querySelector('.giveaway__quick-entry-btn--insert');
-    return !!insert && !insert.classList.contains('is-locked');
+    if (!insert) return false;
+    if (!insert.classList.contains('is-locked')) return true;
+    return !!row.querySelector('.giveaway__quick-entry-btn--description');
   }
   function calculateWeight(row) {
     const restricted = row.querySelector('.giveaway__column--region-restricted') ? 100 : 0;
@@ -60,7 +62,35 @@
     return false;
   });
 
-  function enterGiveaway(row) {
+  function unlockIfNeeded(row) {
+    return new Promise((resolve, reject) => {
+      const insertBtn = row.querySelector('.giveaway__quick-entry-btn--insert');
+      if (insertBtn && !insertBtn.classList.contains('is-locked')) {
+        resolve();
+        return;
+      }
+      const descBtn = row.querySelector('.giveaway__quick-entry-btn--description');
+      if (!insertBtn || !descBtn) {
+        reject(new Error('locked, no description'));
+        return;
+      }
+      descBtn.click();
+      let tries = 0;
+      const timer = setInterval(() => {
+        tries++;
+        if (!insertBtn.classList.contains('is-locked')) {
+          clearInterval(timer);
+          resolve();
+        } else if (tries > 12) {
+          clearInterval(timer);
+          reject(new Error('unlock timeout'));
+        }
+      }, 500);
+    });
+  }
+
+  async function enterGiveaway(row) {
+    await unlockIfNeeded(row);
     return new Promise((resolve, reject) => {
       const insertBtn = row.querySelector('.giveaway__quick-entry-btn--insert');
       if (!insertBtn || insertBtn.classList.contains('is-locked')) {
