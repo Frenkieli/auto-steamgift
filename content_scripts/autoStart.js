@@ -189,6 +189,10 @@ chrome.storage.sync.get(
             async function enterAll(list) {
               for (const row of list) {
                 if (remaining <= 0) break; // 今日額度用完就停
+                const nameLink = row.querySelector(".giveaway__heading__name");
+                const gameName = nameLink ? nameLink.textContent.trim() : "";
+                const gameUrl = nameLink ? nameLink.href : "";
+                const gameCost = core.parsePointCost(row) || 0;
                 try {
                   await enterGiveaway(row);
                   countEntryGift++;
@@ -200,12 +204,28 @@ chrome.storage.sync.get(
                   });
                   // 計數寫入交由 SW 串行化（autoJoinCount + totalEnterGiveaway），避免多分頁競態。
                   chrome.runtime.sendMessage({ type: "enterCommitted" });
+                  chrome.runtime.sendMessage({
+                    type: "recordEntry",
+                    name: gameName,
+                    url: gameUrl,
+                    points: gameCost,
+                    result: "success",
+                    time: Date.now(),
+                  });
                   giftCardUiChange({
                     cardElement: row,
                     text: CARD_TEXT.Enter,
                     ...CARD_STATE.Success,
                   });
                 } catch (e) {
+                  chrome.runtime.sendMessage({
+                    type: "recordEntry",
+                    name: gameName,
+                    url: gameUrl,
+                    points: 0,
+                    result: "fail",
+                    time: Date.now(),
+                  });
                   giftCardUiChange({
                     cardElement: row,
                     text: CARD_TEXT.Fail,
