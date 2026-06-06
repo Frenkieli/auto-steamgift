@@ -241,6 +241,18 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       totalCounter.increment("totalEnterGiveaway", 1);
       break;
     }
+    case "autoEnterDone": {
+      // 安全模式跑完的完成通知（對齊激進模式 fullAutoResult 的行為）。
+      if (message.count > 0) {
+        chrome.notifications.create({
+          type: 'basic',
+          iconUrl: "icons/logo.png",
+          title: chrome.i18n.getMessage("extName"),
+          message: chrome.i18n.getMessage("notifyFullAutoDone", [String(message.count)])
+        });
+      }
+      break;
+    }
     default:
       break;
   }
