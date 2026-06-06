@@ -44,6 +44,10 @@
   }
 
   const delay = (ms) => new Promise((r) => setTimeout(r, ms));
+  const rand = (min, max) => min + Math.floor(Math.random() * (max - min));
+  // 派發基本 hover 事件（書籤版自含，無 Humanize 模組）
+  const hover = (el) => ['mouseover', 'mousemove', 'mouseenter']
+    .forEach((type) => el.dispatchEvent(new MouseEvent(type, { bubbles: true })));
 
   const giftElements = [...document.getElementsByClassName('giveaway__row-inner-wrap')]
     .filter(isEnterable);
@@ -74,6 +78,7 @@
         reject(new Error('locked, no description'));
         return;
       }
+      hover(descBtn);
       descBtn.click();
       let tries = 0;
       const timer = setInterval(() => {
@@ -91,16 +96,22 @@
 
   async function enterGiveaway(row) {
     await unlockIfNeeded(row);
-    return new Promise((resolve, reject) => {
-      const insertBtn = row.querySelector('.giveaway__quick-entry-btn--insert');
-      if (!insertBtn || insertBtn.classList.contains('is-locked')) {
-        reject(new Error('not enterable'));
-        return;
-      }
-      row.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      row.parentNode.style.backgroundColor = '#ff01';
-      insertBtn.click();
 
+    // 點開描述後的閱讀停留（gated 才有 description-panel，是 row-inner-wrap 的兄弟節點）
+    const panel = row.parentNode.querySelector('.giveaway__description-panel');
+    if (panel) await delay(Math.min(15000, 1500 + (panel.textContent || '').length));
+
+    const insertBtn = row.querySelector('.giveaway__quick-entry-btn--insert');
+    if (!insertBtn || insertBtn.classList.contains('is-locked')) throw new Error('not enterable');
+
+    row.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    await delay(rand(300, 800)); // 捲動後停頓
+    row.parentNode.style.backgroundColor = '#ff01';
+    hover(insertBtn);
+    await delay(rand(200, 600)); // hover 後停頓
+    insertBtn.click();
+
+    return new Promise((resolve, reject) => {
       let tries = 0;
       const timer = setInterval(() => {
         tries++;
@@ -127,7 +138,7 @@
       } catch (e) {
         giftCardUiChange({ cardElement: row, text: CARD_TEXT.Fail, ...CARD_STATE.Fail });
       }
-      await delay(Math.floor(Math.random() * 500));
+      await delay(rand(4000, 12000)); // 抽取間的擬人化間隔
     }
     alert(`Enter Giveaway:${countEntryGift}`);
   }
