@@ -6,7 +6,7 @@ const delayRandom = () => new Promise((r) => setTimeout(r, 800 + Math.floor(Math
 chrome.runtime.onMessage.addListener((message) => {
   if (message.type !== "runFullAuto") return;
   runFullAuto(message.cfg || {})
-    .then(({ count, point }) => chrome.runtime.sendMessage({ type: "fullAutoResult", count, point }))
+    .then(({ count, point, loggedIn }) => chrome.runtime.sendMessage({ type: "fullAutoResult", count, point, loggedIn }))
     .catch(() => chrome.runtime.sendMessage({ type: "fullAutoResult", count: 0 }));
 });
 
@@ -39,7 +39,7 @@ async function runFullAuto(cfg) {
 
   const xsrfEl = doc.querySelector('input[name="xsrf_token"]');
   const xsrf = xsrfEl ? xsrfEl.value : null;
-  if (!xsrf) return { count: 0 };
+  if (!xsrf) return { count: 0, loggedIn: false };
 
   const pointsEl = doc.querySelector('.nav__points');
   let myPoint = pointsEl ? Number((pointsEl.textContent || '').replace(/[^0-9]/g, '')) || 0 : 0;
@@ -83,5 +83,5 @@ async function runFullAuto(cfg) {
     }
     await delayRandom();
   }
-  return { count, point: myPoint };
+  return { count, point: myPoint, loggedIn: true };
 }
