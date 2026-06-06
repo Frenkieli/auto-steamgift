@@ -119,3 +119,11 @@
 
 - i18n：新增的字串需同步補上 `_locales/en` 與 `_locales/zh_TW`。
 - 本設計不更動 service worker 的開機通知與點數抓取機制，只在 popup 開啟時額外取一次點數。
+
+## Description-gated giveaways (2026-06-06)
+
+SteamGifts renders a giveaway's quick-entry insert button as `is-locked` whenever the giveaway has a description (it also shows a `giveaway__quick-entry-btn--description` button). The site unlocks the insert only after a successful `do=giveaway_description` AJAX call. The extension therefore:
+
+- treats a locked insert with a sibling `--description` button as enterable (`GiveawayCore.isDescriptionGated` / relaxed `isEnterable`);
+- background full-auto (`offscreen.js`) POSTs `do=giveaway_description` before `do=entry_insert`;
+- in-page auto-enter (`autoStart.js`) clicks the description button and waits for `is-locked` to clear before clicking insert.
