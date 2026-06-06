@@ -35,3 +35,34 @@ test('maybeBreakMs returns a bounded long break when triggered', () => {
   const b = Humanize.maybeBreakMs(seqRng([0.1, 0.5]));
   assert.ok(b >= 60000 && b <= 300000, `out of range: ${b}`);
 });
+
+test('inActiveHours handles a wrap-around window 10:00-02:00', () => {
+  const at = (h, m = 0) => new Date(2026, 0, 1, h, m); // local-time components
+  assert.strictEqual(Humanize.inActiveHours(at(9, 59), 600, 120), false);
+  assert.strictEqual(Humanize.inActiveHours(at(10, 0), 600, 120), true);
+  assert.strictEqual(Humanize.inActiveHours(at(23, 0), 600, 120), true);
+  assert.strictEqual(Humanize.inActiveHours(at(1, 59), 600, 120), true);
+  assert.strictEqual(Humanize.inActiveHours(at(2, 0), 600, 120), false);
+  assert.strictEqual(Humanize.inActiveHours(at(5, 0), 600, 120), false);
+});
+
+test('inActiveHours handles a same-day window 10:00-22:00', () => {
+  const at = (h) => new Date(2026, 0, 1, h, 0);
+  assert.strictEqual(Humanize.inActiveHours(at(12), 600, 1320), true);
+  assert.strictEqual(Humanize.inActiveHours(at(23), 600, 1320), false);
+  assert.strictEqual(Humanize.inActiveHours(at(9), 600, 1320), false);
+});
+
+test('pickDailyCap stays within [50,58] and hits both ends', () => {
+  for (let i = 0; i < 1000; i++) {
+    const c = Humanize.pickDailyCap();
+    assert.ok(c >= 50 && c <= 58 && Number.isInteger(c), `bad cap: ${c}`);
+  }
+  assert.strictEqual(Humanize.pickDailyCap(() => 0), 50);
+  assert.strictEqual(Humanize.pickDailyCap(() => 0.999), 58);
+});
+
+test('shouldEarlyStop fires below the probability and not above', () => {
+  assert.strictEqual(Humanize.shouldEarlyStop(() => 0.05), true);
+  assert.strictEqual(Humanize.shouldEarlyStop(() => 0.5), false);
+});

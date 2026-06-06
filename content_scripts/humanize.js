@@ -29,7 +29,25 @@
     return Math.round(MIN + rng() * (MAX - MIN));
   }
 
-  const Humanize = { humanDelayMs, readingDelayMs, maybeBreakMs };
+  // 是否在活躍時段內（分鐘為單位）；start>end 代表跨午夜
+  function inActiveHours(date, startMin, endMin) {
+    const mins = date.getHours() * 60 + date.getMinutes();
+    if (startMin === endMin) return true; // 全天
+    if (startMin < endMin) return mins >= startMin && mins < endMin;
+    return mins >= startMin || mins < endMin; // 跨午夜
+  }
+
+  // 每日上限（每天重抽，稍微隨機）
+  function pickDailyCap(rng = Math.random, min = 50, max = 58) {
+    return min + Math.floor(rng() * (max - min + 1));
+  }
+
+  // 機率早停：本 session 有機率提早收手
+  function shouldEarlyStop(rng = Math.random, p = 0.10) {
+    return rng() < p;
+  }
+
+  const Humanize = { humanDelayMs, readingDelayMs, maybeBreakMs, inActiveHours, pickDailyCap, shouldEarlyStop };
   root.Humanize = Humanize;
   if (typeof module !== 'undefined' && module.exports) module.exports = Humanize;
 })(typeof window !== 'undefined' ? window : globalThis);
