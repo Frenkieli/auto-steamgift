@@ -19,7 +19,7 @@ SteamGifts 公告將加強偵測並停權 autojoin 自動化帳號(discussion `M
 ## 目標
 
 - 頁面內自動加入改為**保守且擬人**:重尾時間分布、描述閱讀停留、捲動/hover、抵達延遲。
-- **每日上限(稍微隨機,約 20–30)** + **活躍時段 10:00–02:00(跨午夜)** + **機率性早停**,兩條路徑共同遵守。
+- **每日上限(稍微隨機,約 50–58)** + **活躍時段 10:00–02:00(跨午夜)** + **機率性早停**,兩條路徑共同遵守。
 - 背景 AJAX 全自動 → **預設關閉的激進模式**,開啟時明確警告;啟用時也套用閱讀停留與量上限。
 - 高分優先、**不跳過任何願望清單禮物**(只靠上限限量)。
 
@@ -38,7 +38,7 @@ SteamGifts 公告將加強偵測並停權 autojoin 自動化帳號(discussion `M
 | `maybeBreakMs(rng)` | 機率 `p` 回傳長休息(均勻 60000–300000ms),否則 0 | p=0.15 |
 | `shouldEarlyStop(rng)` | 機率 `p` 回傳 true(本 session 早停) | p=0.10 |
 | `inActiveHours(date, startMin, endMin)` | 以「當日分鐘數」判斷是否在時段內,**支援跨午夜**(start>end 時 `mins>=start || mins<end`) | — |
-| `pickDailyCap(rng, min, max)` | 回傳 `min..max` 的整數(每日重抽) | min 20、max 30 |
+| `pickDailyCap(rng, min, max)` | 回傳 `min..max` 的整數(每日重抽) | min 50、max 58 |
 
 對應新測試 `tests/humanize.test.js`:驗證 `humanDelayMs` 永遠落在 [min,max] 且 rng=0.5,0.25 給中位數;`readingDelayMs` 對字數單調遞增且有界;`maybeBreakMs`/`shouldEarlyStop` 的機率分支;`inActiveHours` 的跨午夜邊界(09:59→false、10:00→true、01:59→true、02:00→false);`pickDailyCap` 落在範圍。
 
