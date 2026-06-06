@@ -1,3 +1,59 @@
+// i18n helper for dynamic dashboard strings (mirrors the (key, n?) shape RelativeTime expects)
+function t(key, n) {
+  return n == null ? chrome.i18n.getMessage(key) : chrome.i18n.getMessage(key, [String(n)]);
+}
+
+function renderRecent(list) {
+  const box = document.getElementById("recentList");
+  box.textContent = "";
+  if (!list.length) {
+    const empty = document.createElement("div");
+    empty.className = "recent-empty";
+    empty.textContent = chrome.i18n.getMessage("recentEmpty");
+    box.appendChild(empty);
+    return;
+  }
+  list.forEach((e) => {
+    const row = document.createElement("div");
+    row.className = "recent-row";
+
+    const ok = e.result === "success";
+    const badge = document.createElement("span");
+    badge.className = "badge " + (ok ? "ok" : "fail");
+    badge.textContent = chrome.i18n.getMessage(ok ? "badgeSuccess" : "badgeFail");
+
+    const name = document.createElement("a");
+    name.className = "recent-name";
+    name.textContent = e.name || "—"; // textContent: never trust page-derived names as HTML
+    if (e.url) { name.href = e.url; name.target = "_blank"; name.rel = "noreferrer"; }
+
+    const pts = document.createElement("span");
+    pts.className = "recent-pts";
+    pts.textContent = ok && e.points ? `${e.points}P` : "—";
+
+    const tm = document.createElement("span");
+    tm.className = "recent-tm";
+    tm.textContent = window.RelativeTime.relativeAgoText(e.time || 0, Date.now(), t);
+
+    row.append(badge, name, pts, tm);
+    box.appendChild(row);
+  });
+}
+
+function renderDashboard() {
+  chrome.storage.sync.get(["totalEnterGiveaway", "totalAttempts"], (s) => {
+    document.getElementById("kpiTotal").textContent = (s.totalEnterGiveaway || 0).toLocaleString();
+    const rate = window.EntryRecord.successRate(s.totalEnterGiveaway, s.totalAttempts);
+    document.getElementById("kpiSuccess").textContent = rate == null ? "—" : `${rate}%`;
+  });
+  chrome.storage.local.get(["currentPoint", "pointUpdatedAt", "autoJoinCount", "autoJoinCap", "recentEntries"], (s) => {
+    document.getElementById("kpiPoints").textContent = s.currentPoint == null ? "—" : String(s.currentPoint);
+    document.getElementById("kpiPointsSub").textContent = window.RelativeTime.relativeUpdatedText(s.pointUpdatedAt || 0, Date.now(), t);
+    document.getElementById("kpiToday").textContent = `${s.autoJoinCount || 0} / ${s.autoJoinCap == null ? "—" : s.autoJoinCap}`;
+    renderRecent(s.recentEntries || []);
+  });
+}
+
 const WEIGHT_KEYS = ["restricted", "whitelist", "group", "level", "cost"];
 const WEIGHT_DEFAULTS = {
   restricted: { trigger: true, value: 100 },
@@ -157,7 +213,8 @@ HUMANIZE_FIELDS.forEach((f) => {
 document.getElementById("hz-readingEnabled").addEventListener("change", saveHumanize);
 
 document.getElementById("resetTotal").addEventListener("click", () => {
-  chrome.storage.sync.set({ totalEnterGiveaway: 0 });
+  chrome.storage.sync.set({ totalEnterGiveaway: 0, totalAttempts: 0 });
+  chrome.storage.local.set({ recentEntries: [] }, renderDashboard);
 });
 
 document.getElementById("resetDefault").addEventListener("click", () => {
@@ -168,3 +225,11 @@ document.getElementById("resetDefault").addEventListener("click", () => {
 });
 
 load();
+renderDashboard();
+
+// 即時反映抽獎/點數變化（safe & aggressive 模式都會寫這些 key）
+chrome.storage.onChanged.addListener((changes, area) => {
+  const keys = Object.keys(changes);
+  const hit = ["recentEntries", "currentPoint", "pointUpdatedAt", "autoJoinCount", "autoJoinCap", "totalEnterGiveaway", "totalAttempts"];
+  if (keys.some((k) => hit.includes(k))) renderDashboard();
+});
