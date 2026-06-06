@@ -63,8 +63,10 @@ test('readingDelayMs is clamped to default [1500, 15000]', () => {
 });
 
 test('readingDelayMs slower wpm yields a longer stay', () => {
+  // Use a short description so neither result clamps to readMax (15000):
+  // 150 chars = 30 words -> 150wpm ~13200ms, 600wpm ~4200ms.
   const r = () => 0.5;
-  assert.ok(Humanize.readingDelayMs(1000, { readWpm: 150 }, r) > Humanize.readingDelayMs(1000, { readWpm: 600 }, r));
+  assert.ok(Humanize.readingDelayMs(150, { readWpm: 150 }, r) > Humanize.readingDelayMs(150, { readWpm: 600 }, r));
 });
 
 // ---- maybeBreakMs ----

@@ -58,7 +58,7 @@
     const c = resolveConfig(cfg);
     const words = textLen / 5;
     const variance = 0.7 + rng() * 0.6; // 0.7..1.3
-    const ms = c.readBase + (words / c.readWpm) * 6000 * variance;
+    const ms = c.readBase + (words / c.readWpm) * 60000 * variance;
     return Math.round(Math.min(c.readMax, Math.max(c.readMin, ms)));
   }
 
