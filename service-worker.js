@@ -95,7 +95,7 @@ chrome.runtime.onInstalled.addListener(function(details){
     })
   }else if(details.reason == "update"){
     chrome.storage.sync.get(["autoScore"], function(config) {
-      if(config.autoScore.trigger) {
+      if(config.autoScore && config.autoScore.trigger) {
         registerCountScoreContentScripts();
       }
     })
@@ -105,7 +105,7 @@ chrome.runtime.onInstalled.addListener(function(details){
 
 chrome.runtime.onStartup.addListener(() => {
   chrome.storage.sync.get(["autoScore"], function(config) {
-    if(config.autoScore.trigger) {
+    if(config.autoScore && config.autoScore.trigger) {
       registerCountScoreContentScripts();
     }
   })
@@ -145,7 +145,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   switch (message.type) {
     case "countScoreEnd": {
       chrome.storage.sync.get(["autoStart"], function (config) {
-        if (config.autoStart.trigger) {
+        if (config.autoStart && config.autoStart.trigger) {
           injectAutoScript(sender.tab.id);
         }
       });
