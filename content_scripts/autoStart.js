@@ -169,5 +169,5 @@ chrome.storage.sync.get(["minScore", "minLevel", "requiredTypes", "pointFloor", 
 
       enterAll(readyToEnterGiftElements);
     });
-  }, 2000 + Math.floor(Math.random() * 8000)); // 抵達延遲：頁面載入後 2–10 秒才開始
+  }, 500 + Math.floor(Math.random() * 1500)); // 抵達延遲：頁面載入後 0.5–2 秒才開始
 });
