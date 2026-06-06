@@ -150,12 +150,9 @@ chrome.storage.sync.get(["minScore", "minLevel", "requiredTypes", "pointFloor", 
             countEntryGift++;
             autoJoinCount++;
             remaining--;
-            chrome.storage.local.set({ autoJoinCount });
             chrome.runtime.sendMessage({ type: "setBadgeText", text: String(countEntryGift) });
-            chrome.storage.sync.get(["totalEnterGiveaway"], function (config) {
-              const total = ((config.totalEnterGiveaway || 0) * 1) + 1;
-              chrome.storage.sync.set({ totalEnterGiveaway: total });
-            });
+            // 計數寫入交由 SW 串行化（autoJoinCount + totalEnterGiveaway），避免多分頁競態。
+            chrome.runtime.sendMessage({ type: "enterCommitted" });
             giftCardUiChange({ cardElement: row, text: CARD_TEXT.Enter, ...CARD_STATE.Success });
           } catch (e) {
             giftCardUiChange({ cardElement: row, text: CARD_TEXT.Fail, ...CARD_STATE.Fail });
