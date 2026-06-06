@@ -220,7 +220,10 @@ document.getElementById("resetTotal").addEventListener("click", () => {
 document.getElementById("resetDefault").addEventListener("click", () => {
   fetch(chrome.runtime.getURL("defaultSchema.json"))
     .then((res) => res.json())
-    .then((data) => { chrome.storage.sync.set(data, () => location.reload()); })
+    .then((data) => {
+      chrome.storage.local.set({ recentEntries: [] }); // local 不在 sync schema，需另外清
+      chrome.storage.sync.set(data, () => location.reload());
+    })
     .catch((err) => console.error("restore defaults failed", err));
 });
 
