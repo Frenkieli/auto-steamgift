@@ -13,6 +13,10 @@ test('defaultSchema has new minimum/behaviour keys with correct defaults', () =>
   assert.strictEqual(schema.fullAutoWarned, false);
 });
 
+test('defaultSchema seeds totalAttempts at 0', () => {
+  assert.strictEqual(schema.totalAttempts, 0);
+});
+
 test('defaultSchema seeds humanizeConfig with canonical defaults', () => {
   assert.deepStrictEqual(schema.humanizeConfig, {
     delayMedian: 4000, delaySigma: 0.6, delayMin: 2000, delayMax: 30000,

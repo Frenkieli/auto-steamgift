@@ -26,6 +26,7 @@
     "trigger": false
   },
   "totalEnterGiveaway": 0,
+  "totalAttempts": 0,
   "minScore": 0,
   "minLevel": 0,
   "requiredTypes": { "restricted": false, "whitelist": false, "group": false, "mode": "any" },
