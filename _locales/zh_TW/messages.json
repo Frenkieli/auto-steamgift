@@ -102,5 +102,9 @@
   "pointUpdatedJustNow": { "message": "剛剛更新", "description": "點數剛剛更新" },
   "pointUpdatedMinutes": { "message": "更新於 $N$ 分鐘前", "placeholders": { "n": { "content": "$1" } }, "description": "點數更新於 N 分鐘前" },
   "pointUpdatedHours": { "message": "更新於 $N$ 小時前", "placeholders": { "n": { "content": "$1" } }, "description": "點數更新於 N 小時前" },
-  "pointUpdatedDays": { "message": "更新於 $N$ 天前", "placeholders": { "n": { "content": "$1" } }, "description": "點數更新於 N 天前" }
+  "pointUpdatedDays": { "message": "更新於 $N$ 天前", "placeholders": { "n": { "content": "$1" } }, "description": "點數更新於 N 天前" },
+  "agoJustNow": { "message": "剛剛", "description": "相對時間：剛剛" },
+  "agoMinutes": { "message": "$N$ 分鐘前", "placeholders": { "n": { "content": "$1" } }, "description": "相對時間：N 分鐘前" },
+  "agoHours": { "message": "$N$ 小時前", "placeholders": { "n": { "content": "$1" } }, "description": "相對時間：N 小時前" },
+  "agoDays": { "message": "$N$ 天前", "placeholders": { "n": { "content": "$1" } }, "description": "相對時間：N 天前" }
 }

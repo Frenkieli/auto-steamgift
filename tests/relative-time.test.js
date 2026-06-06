@@ -1,6 +1,6 @@
 const test = require('node:test');
 const assert = require('node:assert');
-const { relativeUpdatedText } = require('../content_scripts/relativeTime.js');
+const { relativeUpdatedText, relativeAgoText } = require('../content_scripts/relativeTime.js');
 
 // Fake i18n: returns "key" or "key:N" so tests assert on the chosen branch + number.
 const t = (key, n) => (n === undefined ? key : `${key}:${n}`);
@@ -29,4 +29,16 @@ test('days branch reports whole days', () => {
 
 test('a future-ish/zero diff still reads as just now, not negative', () => {
   assert.strictEqual(relativeUpdatedText(NOW, NOW, t), 'pointUpdatedJustNow');
+});
+
+test('relativeAgoText: under a minute is just now', () => {
+  assert.strictEqual(relativeAgoText(NOW - 20 * 1000, NOW, t), 'agoJustNow');
+});
+test('relativeAgoText: minutes / hours / days branches', () => {
+  assert.strictEqual(relativeAgoText(NOW - 5 * 60 * 1000, NOW, t), 'agoMinutes:5');
+  assert.strictEqual(relativeAgoText(NOW - 3 * 60 * 60 * 1000, NOW, t), 'agoHours:3');
+  assert.strictEqual(relativeAgoText(NOW - 2 * 24 * 60 * 60 * 1000, NOW, t), 'agoDays:2');
+});
+test('relativeAgoText: zero/negative diff reads as just now', () => {
+  assert.strictEqual(relativeAgoText(NOW, NOW, t), 'agoJustNow');
 });

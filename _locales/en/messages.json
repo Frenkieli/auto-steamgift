@@ -102,5 +102,9 @@
   "pointUpdatedJustNow": { "message": "Updated just now", "description": "points updated just now" },
   "pointUpdatedMinutes": { "message": "Updated $N$ min ago", "placeholders": { "n": { "content": "$1" } }, "description": "points updated N minutes ago" },
   "pointUpdatedHours": { "message": "Updated $N$ h ago", "placeholders": { "n": { "content": "$1" } }, "description": "points updated N hours ago" },
-  "pointUpdatedDays": { "message": "Updated $N$ d ago", "placeholders": { "n": { "content": "$1" } }, "description": "points updated N days ago" }
+  "pointUpdatedDays": { "message": "Updated $N$ d ago", "placeholders": { "n": { "content": "$1" } }, "description": "points updated N days ago" },
+  "agoJustNow": { "message": "just now", "description": "relative time: just now" },
+  "agoMinutes": { "message": "$N$ min ago", "placeholders": { "n": { "content": "$1" } }, "description": "relative time: N minutes ago" },
+  "agoHours": { "message": "$N$ hr ago", "placeholders": { "n": { "content": "$1" } }, "description": "relative time: N hours ago" },
+  "agoDays": { "message": "$N$ days ago", "placeholders": { "n": { "content": "$1" } }, "description": "relative time: N days ago" }
 }
