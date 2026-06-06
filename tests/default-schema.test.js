@@ -12,3 +12,13 @@ test('defaultSchema has new minimum/behaviour keys with correct defaults', () =>
   assert.strictEqual(schema.goLinkTarget, 'wishlist');
   assert.strictEqual(schema.fullAutoWarned, false);
 });
+
+test('defaultSchema seeds humanizeConfig with canonical defaults', () => {
+  assert.deepStrictEqual(schema.humanizeConfig, {
+    delayMedian: 13000, delaySigma: 0.6, delayMin: 6000, delayMax: 240000,
+    readWpm: 300, readBase: 1200, readMin: 1500, readMax: 15000,
+    breakProb: 0.15, breakMin: 60000, breakMax: 300000,
+    earlyStopProb: 0.1,
+    capMin: 50, capMax: 58
+  });
+});
