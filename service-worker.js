@@ -1,4 +1,5 @@
 importScripts('lib/serial-counter.js');
+importScripts('content_scripts/humanize.js');
 
 // 序列化計數器：所有計數寫入都經由單一 SW 串行化，杜絕多分頁同時 +1 的競態。
 const joinCounter = self.SerialCounter.createSerialCounter({
@@ -21,16 +22,6 @@ const HOME_URL = "https://www.steamgifts.com/";
 const WISHLIST_URL = "https://www.steamgifts.com/giveaways/search?type=wishlist";
 const POINT_TTL_MS = 6 * 60 * 60 * 1000; // 6 小時
 
-// 與 content_scripts/humanize.js 同邏輯的精簡版（SW 無法載入 window 版的 humanize）
-function inActiveHours(date, startMin, endMin) {
-  const mins = date.getHours() * 60 + date.getMinutes();
-  if (startMin === endMin) return true;
-  if (startMin < endMin) return mins >= startMin && mins < endMin;
-  return mins >= startMin || mins < endMin; // 跨午夜
-}
-function pickDailyCap(min = 50, max = 58) {
-  return min + Math.floor(Math.random() * (max - min + 1));
-}
 // 安全模式：開或聚焦願望清單分頁（頁內擬人化 autoStart 會處理加入）
 function openWishlistTab() {
   chrome.tabs.query({ url: "https://www.steamgifts.com/giveaways/search?type=wishlist*" }, (tabs) => {
@@ -176,7 +167,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     }
 
     case "fullAutoWishlist": {
-      chrome.storage.sync.get([...FULL_AUTO_CFG_KEYS, "aggressiveMode", "activeHours"], (cfg) => {
+      chrome.storage.sync.get([...FULL_AUTO_CFG_KEYS, "aggressiveMode", "activeHours", "humanizeConfig"], (cfg) => {
         const aggressive = !!(cfg.aggressiveMode && cfg.aggressiveMode.trigger);
         if (!aggressive) {
           openWishlistTab(); // 安全模式：開願望清單分頁，由頁內擬人化 autoStart 處理
@@ -184,7 +175,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         }
         // 激進模式：背景 offscreen，受活躍時段與每日預算限制
         const ah = cfg.activeHours || { start: 600, end: 120 };
-        if (!inActiveHours(new Date(), ah.start, ah.end)) return; // 非活躍時段不跑
+        if (!self.Humanize.inActiveHours(new Date(), ah.start, ah.end)) return; // 非活躍時段不跑
         if (fullAutoRunning) return;
         // 同步搶佔旗標：兩則快速接連的訊息中，先到者在此回呼同步執行完才輪到後者，
         // 後者會看到旗標已為 true 而退出，杜絕並發。之後每條提早返回的路徑都要釋放。
@@ -197,7 +188,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
             count = b.autoJoinCount || 0;
             cap = b.autoJoinCap;
           } else {
-            cap = pickDailyCap();
+            cap = self.Humanize.pickDailyCap(cfg.humanizeConfig || {});
             chrome.storage.local.set({ autoJoinDate: today, autoJoinCount: 0, autoJoinCap: cap });
           }
           const remaining = Math.max(0, cap - count);

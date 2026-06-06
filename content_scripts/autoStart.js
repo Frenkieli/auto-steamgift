@@ -1,8 +1,9 @@
-chrome.storage.sync.get(["minScore", "minLevel", "requiredTypes", "pointFloor", "activeHours"], function (cfg) {
+chrome.storage.sync.get(["minScore", "minLevel", "requiredTypes", "pointFloor", "activeHours", "humanizeConfig"], function (cfg) {
   setTimeout(() => {
     if (!document.querySelector('.nav__points')) return; // 未登入則不自動加入
 
     const human = window.Humanize;
+    const hcfg = cfg.humanizeConfig || {};
 
     // 活躍時段檢查：非時段不動作
     const ah = cfg.activeHours || { start: 600, end: 120 };
@@ -17,7 +18,7 @@ chrome.storage.sync.get(["minScore", "minLevel", "requiredTypes", "pointFloor", 
       if (autoJoinDate !== today) {
         autoJoinDate = today;
         autoJoinCount = 0;
-        autoJoinCap = human.pickDailyCap();
+        autoJoinCap = human.pickDailyCap(hcfg);
         chrome.storage.local.set({ autoJoinDate, autoJoinCount, autoJoinCap });
       }
       let remaining = Math.max(0, autoJoinCap - autoJoinCount);
@@ -111,7 +112,7 @@ chrome.storage.sync.get(["minScore", "minLevel", "requiredTypes", "pointFloor", 
 
         // 點開描述後的閱讀停留（gated 才會有 description-panel，它是 row-inner-wrap 的兄弟節點）
         const panel = row.parentNode.querySelector('.giveaway__description-panel');
-        if (panel) await delay(human.readingDelayMs((panel.textContent || '').length));
+        if (panel) await delay(human.readingDelayMs((panel.textContent || '').length, hcfg));
 
         const insertBtn = row.querySelector('.giveaway__quick-entry-btn--insert');
         if (!insertBtn || insertBtn.classList.contains('is-locked')) throw new Error('not enterable');
@@ -157,10 +158,10 @@ chrome.storage.sync.get(["minScore", "minLevel", "requiredTypes", "pointFloor", 
           } catch (e) {
             giftCardUiChange({ cardElement: row, text: CARD_TEXT.Fail, ...CARD_STATE.Fail });
           }
-          await delay(human.humanDelayMs());
-          const breakMs = human.maybeBreakMs();
+          await delay(human.humanDelayMs(hcfg));
+          const breakMs = human.maybeBreakMs(hcfg);
           if (breakMs) await delay(breakMs);
-          if (human.shouldEarlyStop()) break; // 機率早停
+          if (human.shouldEarlyStop(hcfg)) break; // 機率早停
         }
         window.scrollTo({ top: 0, behavior: "smooth" });
         chrome.runtime.sendMessage({ type: "autoEnterDone", count: countEntryGift });

@@ -41,6 +41,7 @@ const fetchDescriptionLen = async (code, xsrf) => {
 
 async function runFullAuto(cfg, maxEntries) {
   const human = window.Humanize;
+  const hcfg = (cfg && cfg.humanizeConfig) || {};
   const res = await fetch(WISHLIST_URL, { credentials: "include" });
   const html = await res.text();
   const doc = new DOMParser().parseFromString(html, "text/html");
@@ -83,15 +84,15 @@ async function runFullAuto(cfg, maxEntries) {
     if (!code) continue;
     if (core.isDescriptionGated(row)) {
       const len = await fetchDescriptionLen(code, xsrf);
-      await delay(human.readingDelayMs(len)); // 閱讀停留（伺服器可觀測）
+      await delay(human.readingDelayMs(len, hcfg)); // 閱讀停留（伺服器可觀測）
     }
     const ok = await enterOne(code, xsrf);
     if (ok) {
       myPoint -= cost;
       count++;
     }
-    await delay(human.humanDelayMs());
-    const breakMs = human.maybeBreakMs();
+    await delay(human.humanDelayMs(hcfg));
+    const breakMs = human.maybeBreakMs(hcfg);
     if (breakMs) await delay(breakMs);
   }
   return { count, point: myPoint, loggedIn: true };
