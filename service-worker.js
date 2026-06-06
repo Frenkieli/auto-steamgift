@@ -13,33 +13,42 @@ function storePoints(point) {
   chrome.storage.local.set({ currentPoint: point, pointUpdatedAt: Date.now() });
 }
 
+// 實際抓首頁、解析點數、寫入 loggedIn/點數。回傳 Promise<true|false|null>
+// true=已登入, false=抓到但未登入, null=fetch 失敗(不可改動 loggedIn)
+function fetchAndStorePoints({ notify }) {
+  return fetch(HOME_URL, { credentials: "include" })
+    .then((res) => res.text())
+    .then((html) => {
+      const match = html.match(/<span class="nav__points">(\d+)<\/span>/);
+      if (!match) {
+        chrome.storage.local.set({ loggedIn: false });
+        return false;
+      }
+      const point = Number(match[1]);
+      chrome.storage.local.set({ currentPoint: point, pointUpdatedAt: Date.now(), loggedIn: true });
+      if (notify) {
+        chrome.notifications.clear(NOTIFICATION_TYPE.CurrentPoint);
+        chrome.notifications.create(NOTIFICATION_TYPE.CurrentPoint, {
+          type: 'basic',
+          iconUrl: "icons/logo.png",
+          title: chrome.i18n.getMessage("extName"),
+          contextMessage: `你目前的點數為:${point}`,
+          message: "立即前往 SteamGift 網站",
+          eventTime: new Date().getTime() + 60000,
+          isClickable: true
+        });
+      }
+      return true;
+    })
+    .catch(() => null);
+}
+
 // 過期才抓：距上次更新 < 6h 就用快取、不發請求
 function refreshPointsIfStale({ notify }) {
   chrome.storage.local.get(["pointUpdatedAt"], (cache) => {
     const updatedAt = cache.pointUpdatedAt || 0;
     if (Date.now() - updatedAt < POINT_TTL_MS) return;
-
-    fetch(HOME_URL, { credentials: "include" })
-      .then((res) => res.text())
-      .then((html) => {
-        const match = html.match(/<span class="nav__points">(\d+)<\/span>/);
-        if (!match) return;
-        const point = Number(match[1]);
-        storePoints(point);
-        if (notify) {
-          chrome.notifications.clear(NOTIFICATION_TYPE.CurrentPoint);
-          chrome.notifications.create(NOTIFICATION_TYPE.CurrentPoint, {
-            type: 'basic',
-            iconUrl: "icons/logo.png",
-            title: chrome.i18n.getMessage("extName"),
-            contextMessage: `你目前的點數為:${point}`,
-            message: "立即前往 SteamGift 網站",
-            eventTime: new Date().getTime() + 60000,
-            isClickable: true
-          });
-        }
-      })
-      .catch(() => {});
+    fetchAndStorePoints({ notify });
   });
 }
 
@@ -120,6 +129,12 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       break;
     }
 
+    case "forceLoginCheck": {
+      // 使用者主動觸發，繞過 6h 閘門，抓一次並回報結果
+      fetchAndStorePoints({ notify: false }).then((loggedIn) => sendResponse({ loggedIn }));
+      return true; // 非同步回應，保持訊息通道開啟
+    }
+
     case "refreshPointsIfStale": {
       refreshPointsIfStale({ notify: false });
       break;
@@ -141,6 +156,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     case "fullAutoResult": {
       fullAutoRunning = false;
       chrome.storage.local.set({ fullAutoRunning: false }); // 解除 popup loading
+      if (message.loggedIn != null) chrome.storage.local.set({ loggedIn: message.loggedIn });
       if (message.point != null) storePoints(message.point);
       if (message.count > 0) {
         chrome.storage.sync.get(["totalEnterGiveaway"], (c) => {
