@@ -1,6 +1,6 @@
 # 登入狀態偵測與登出保護 設計文件
 
-> 日期:2026-06-06　目標版本:1.4
+> 日期:2026-06-06　版本:維持 1.2(尚未上架,不逐功能 bump)
 
 ## 問題
 
@@ -104,7 +104,7 @@ if (!document.querySelector('.nav__points')) return; // 未登入則不自動加
 - `popup/popup.js`:集中 `isRunning`/`loggedOut` 狀態、橫幅與重新檢查邏輯。
 - `popup/popup.css`:橫幅與按鈕樣式。
 - `_locales/zh_TW/messages.json`、`_locales/en/messages.json`:3 個新 key。
-- `manifest.json`:版本 `1.3` → `1.4`。
+- `manifest.json`:不變動(版本維持 1.2)。
 
 ## 不做(YAGNI)
 
