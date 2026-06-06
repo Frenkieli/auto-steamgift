@@ -58,6 +58,7 @@
   "popFullAuto": { "message": "Full-Auto Enter Wishlist", "description": "popup full-auto button" },
   "popFullAutoWarn": { "message": "Overuse may get your account banned. Use with care.", "description": "popup full-auto warning" },
   "popFullAutoConfirm": { "message": "⚠ Click again to confirm", "description": "popup full-auto armed button label" },
+  "popFullAutoRunning": { "message": "Running… please wait", "description": "popup full-auto running label" },
   "popPoints": { "message": "Current Points", "description": "popup current points label" },
   "popGoSteam": { "message": "Go to SteamGifts", "description": "popup go to steamgifts button" },
   "notifyFullAutoDone": { "message": "Auto-entered $COUNT$ wishlist giveaways", "placeholders": { "count": { "content": "$1" } }, "description": "full-auto done notification" },

@@ -12,7 +12,26 @@ document.getElementById("form-autoStartCheckBox")
 
 const fullAutoBtn = document.getElementById("fullAutoBtn");
 let fullAutoArmed = false;
+
+function setFullAutoLoading(running) {
+  fullAutoBtn.disabled = running;
+  fullAutoBtn.classList.toggle("is-loading", running);
+  fullAutoBtn.textContent = chrome.i18n.getMessage(running ? "popFullAutoRunning" : "popFullAuto");
+}
+
+// 開啟 popup 時反映目前是否正在抽取
+chrome.storage.local.get(["fullAutoRunning"], (s) => setFullAutoLoading(!!s.fullAutoRunning));
+
+// 抽取狀態變化時即時更新（完成通知後 SW 會把旗標設為 false → 解除 loading）
+chrome.storage.onChanged.addListener((changes, area) => {
+  if (area === "local" && changes.fullAutoRunning) {
+    fullAutoArmed = false;
+    setFullAutoLoading(!!changes.fullAutoRunning.newValue);
+  }
+});
+
 fullAutoBtn.addEventListener("click", () => {
+  if (fullAutoBtn.disabled) return;
   chrome.storage.sync.get(["fullAutoWarned"], (cfg) => {
     if (!cfg.fullAutoWarned && !fullAutoArmed) {
       fullAutoArmed = true;
@@ -21,7 +40,7 @@ fullAutoBtn.addEventListener("click", () => {
     }
     chrome.storage.sync.set({ fullAutoWarned: true });
     chrome.runtime.sendMessage({ type: "fullAutoWishlist" });
-    window.close();
+    setFullAutoLoading(true); // 立即回饋；保持 popup 開著，不關閉
   });
 });
 

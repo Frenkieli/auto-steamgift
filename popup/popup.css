@@ -20,6 +20,11 @@ h1 { font-size: 16px; margin-bottom: 10px; }
   border-radius: 6px;
   cursor: pointer;
 }
+.full-auto-btn.is-loading,
+.full-auto-btn:disabled {
+  opacity: 0.65;
+  cursor: progress;
+}
 
 .warn {
   font-size: 11px;

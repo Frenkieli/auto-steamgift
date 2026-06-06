@@ -128,17 +128,19 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     case "fullAutoWishlist": {
       if (fullAutoRunning) break;
       fullAutoRunning = true;
+      chrome.storage.local.set({ fullAutoRunning: true }); // 供 popup 顯示 loading
       // offscreen 文件拿不到 chrome.storage，所以由 SW 讀設定後用訊息帶過去
       chrome.storage.sync.get(FULL_AUTO_CFG_KEYS, (cfg) => {
         ensureOffscreen()
           .then(() => chrome.runtime.sendMessage({ type: "runFullAuto", cfg }))
-          .catch(() => { fullAutoRunning = false; });
+          .catch(() => { fullAutoRunning = false; chrome.storage.local.set({ fullAutoRunning: false }); });
       });
       break;
     }
 
     case "fullAutoResult": {
       fullAutoRunning = false;
+      chrome.storage.local.set({ fullAutoRunning: false }); // 解除 popup loading
       if (message.point != null) storePoints(message.point);
       if (message.count > 0) {
         chrome.storage.sync.get(["totalEnterGiveaway"], (c) => {
