@@ -6,7 +6,7 @@ const delayRandom = () => new Promise((r) => setTimeout(r, 800 + Math.floor(Math
 chrome.runtime.onMessage.addListener((message) => {
   if (message.type !== "runFullAuto") return;
   runFullAuto(message.cfg || {})
-    .then((count) => chrome.runtime.sendMessage({ type: "fullAutoResult", count }))
+    .then(({ count, point }) => chrome.runtime.sendMessage({ type: "fullAutoResult", count, point }))
     .catch(() => chrome.runtime.sendMessage({ type: "fullAutoResult", count: 0 }));
 });
 
@@ -83,5 +83,5 @@ async function runFullAuto(cfg) {
     }
     await delayRandom();
   }
-  return count;
+  return { count, point: myPoint };
 }
