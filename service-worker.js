@@ -1,5 +1,6 @@
 importScripts('lib/serial-counter.js');
 importScripts('content_scripts/humanize.js');
+importScripts('content_scripts/entryRecord.js');
 
 // 序列化計數器：所有計數寫入都經由單一 SW 串行化，杜絕多分頁同時 +1 的競態。
 const joinCounter = self.SerialCounter.createSerialCounter({
@@ -10,6 +11,13 @@ const totalCounter = self.SerialCounter.createSerialCounter({
   get: (key) => new Promise((res) => chrome.storage.sync.get([key], (o) => res(o[key] || 0))),
   set: (key, value) => new Promise((res) => chrome.storage.sync.set({ [key]: value }, res)),
 });
+const recentList = self.SerialCounter.createSerialList(
+  {
+    get: (key) => new Promise((res) => chrome.storage.local.get([key], (o) => res(o[key] || []))),
+    set: (key, value) => new Promise((res) => chrome.storage.local.set({ [key]: value }, res)),
+  },
+  (list, item) => self.EntryRecord.pushRecentEntry(list, item, 20)
+);
 
 let fullAutoRunning = false;
 
@@ -131,7 +139,7 @@ chrome.storage.onChanged.addListener((changes, areaName) => {
   // 否則 readPoints 每次載入就寫 local → onChanged → reload → 無限迴圈。
   if (areaName !== "sync") return;
 
-  const NO_RELOAD_KEYS = ["totalEnterGiveaway", "fullAutoWarned", "goLinkTarget"];
+  const NO_RELOAD_KEYS = ["totalEnterGiveaway", "totalAttempts", "fullAutoWarned", "goLinkTarget"];
   const onlyCosmetic = Object.keys(changes).every((k) => NO_RELOAD_KEYS.includes(k));
   if(!onlyCosmetic) {
     // 更新重整網站
@@ -211,6 +219,12 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         totalCounter.increment("totalEnterGiveaway", message.count);
         joinCounter.increment("autoJoinCount", message.count);
       }
+      if (Array.isArray(message.entries)) {
+        message.entries.forEach((e) => {
+          totalCounter.increment("totalAttempts", 1);
+          recentList.push("recentEntries", e);
+        });
+      }
       chrome.notifications.create({
         type: 'basic',
         iconUrl: "icons/logo.png",
@@ -224,6 +238,18 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     case "setBadgeText": {
       chrome.action.setBadgeText({ tabId: sender.tab.id, text: message.text });
       chrome.action.setBadgeBackgroundColor({ color: "#583628" });
+      break;
+    }
+    case "recordEntry": {
+      // 每次抽獎嘗試（成功或失敗）：累計嘗試數 + 寫入最近 20 款（皆走 SW 串行化）。
+      totalCounter.increment("totalAttempts", 1);
+      recentList.push("recentEntries", {
+        name: message.name || "",
+        url: message.url || "",
+        points: message.points || 0,
+        result: message.result,
+        time: message.time || Date.now(),
+      });
       break;
     }
     case "enterCommitted": {
