@@ -1,11 +1,11 @@
 const WISHLIST_URL = "https://www.steamgifts.com/giveaways/search?type=wishlist";
 const ENTRY_URL = "https://www.steamgifts.com/ajax.php";
 
-const delayRandom = () => new Promise((r) => setTimeout(r, 800 + Math.floor(Math.random() * 1200)));
+const delay = (ms) => new Promise((r) => setTimeout(r, ms));
 
 chrome.runtime.onMessage.addListener((message) => {
   if (message.type !== "runFullAuto") return;
-  runFullAuto(message.cfg || {})
+  runFullAuto(message.cfg || {}, message.maxEntries || 0)
     .then(({ count, point, loggedIn }) => chrome.runtime.sendMessage({ type: "fullAutoResult", count, point, loggedIn }))
     .catch(() => chrome.runtime.sendMessage({ type: "fullAutoResult", count: 0 }));
 });
@@ -22,17 +22,25 @@ async function postAjax(doValue, code, xsrf) {
       },
       body: body.toString()
     });
-    const data = await res.json();
-    return !!data && data.type === "success";
+    return await res.json();
   } catch (e) {
-    return false;
+    return null;
   }
 }
 
-const enterOne = (code, xsrf) => postAjax("entry_insert", code, xsrf);
-const viewDescription = (code, xsrf) => postAjax("giveaway_description", code, xsrf);
+const enterOne = async (code, xsrf) => {
+  const data = await postAjax("entry_insert", code, xsrf);
+  return !!data && data.type === "success";
+};
 
-async function runFullAuto(cfg) {
+// 點開描述（giveaway_description）並回傳描述文字長度，供閱讀停留計算
+const fetchDescriptionLen = async (code, xsrf) => {
+  const data = await postAjax("giveaway_description", code, xsrf);
+  return (data && data.html ? String(data.html) : "").length;
+};
+
+async function runFullAuto(cfg, maxEntries) {
+  const human = window.Humanize;
   const res = await fetch(WISHLIST_URL, { credentials: "include" });
   const html = await res.text();
   const doc = new DOMParser().parseFromString(html, "text/html");
@@ -68,20 +76,23 @@ async function runFullAuto(cfg) {
   let count = 0;
 
   for (const row of eligible) {
+    if (count >= maxEntries) break; // 每日額度上限
     const cost = core.parsePointCost(row) || 0;
     if (myPoint - cost < pointFloor) continue;
     const code = core.extractCode(row);
     if (!code) continue;
     if (core.isDescriptionGated(row)) {
-      await viewDescription(code, xsrf);
-      await delayRandom();
+      const len = await fetchDescriptionLen(code, xsrf);
+      await delay(human.readingDelayMs(len)); // 閱讀停留（伺服器可觀測）
     }
     const ok = await enterOne(code, xsrf);
     if (ok) {
       myPoint -= cost;
       count++;
     }
-    await delayRandom();
+    await delay(human.humanDelayMs());
+    const breakMs = human.maybeBreakMs();
+    if (breakMs) await delay(breakMs);
   }
   return { count, point: myPoint, loggedIn: true };
 }
