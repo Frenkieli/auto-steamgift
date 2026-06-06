@@ -174,6 +174,9 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         const ah = cfg.activeHours || { start: 600, end: 120 };
         if (!inActiveHours(new Date(), ah.start, ah.end)) return; // 非活躍時段不跑
         if (fullAutoRunning) return;
+        // 同步搶佔旗標：兩則快速接連的訊息中，先到者在此回呼同步執行完才輪到後者，
+        // 後者會看到旗標已為 true 而退出，杜絕並發。之後每條提早返回的路徑都要釋放。
+        fullAutoRunning = true;
         chrome.storage.local.get(["autoJoinDate", "autoJoinCount", "autoJoinCap"], (b) => {
           const today = new Date().toLocaleDateString('en-CA');
           let count = 0;
@@ -186,8 +189,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
             chrome.storage.local.set({ autoJoinDate: today, autoJoinCount: 0, autoJoinCap: cap });
           }
           const remaining = Math.max(0, cap - count);
-          if (remaining <= 0) return; // 今日額度用完
-          fullAutoRunning = true;
+          if (remaining <= 0) { fullAutoRunning = false; return; } // 今日額度用完，釋放旗標
           chrome.storage.local.set({ fullAutoRunning: true }); // 供 popup 顯示 loading
           ensureOffscreen()
             .then(() => chrome.runtime.sendMessage({ type: "runFullAuto", cfg, maxEntries: remaining }))
