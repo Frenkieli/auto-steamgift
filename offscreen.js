@@ -39,7 +39,7 @@ async function runFullAuto(cfg) {
 
   const xsrfEl = doc.querySelector('input[name="xsrf_token"]');
   const xsrf = xsrfEl ? xsrfEl.value : null;
-  if (!xsrf) return 0;
+  if (!xsrf) return { count: 0 };
 
   const pointsEl = doc.querySelector('.nav__points');
   let myPoint = pointsEl ? Number((pointsEl.textContent || '').replace(/[^0-9]/g, '')) || 0 : 0;
