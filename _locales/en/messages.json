@@ -19,14 +19,6 @@
     "message": "Setting",
     "description": "popup.html link to options page"
   },
-  "popSubmit": {
-    "message": "Save",
-    "description": "popup.html submit text"
-  },
-  "popStart": {
-    "message": "Start",
-    "description": "popup.html Start"
-  },
   "formRestricted": {
     "message": "Restricted",
     "description": "popup.html form SteamGift Restricted"

@@ -19,14 +19,6 @@
     "message": "進入設定頁",
     "description": "popup.html 連到 options 連結的文字"
   },
-  "popSubmit": {
-    "message": "保存",
-    "description": "popup.html 連到 submit 文字"
-  },
-  "popStart": {
-    "message": "加入",
-    "description": "popup.html 開始加入文字"
-  },
   "formRestricted": {
     "message": "地區",
     "description": "popup.html 的表單 SteamGift 關於地區"

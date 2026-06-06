@@ -21,9 +21,6 @@
     "128": "icons/icon-128.png"
   },
   "permissions": ["storage", "scripting", "tabs", "notifications", "offscreen"],
-  "storage": {
-    "managed_schema": "schema.json"
-  },
   "action": {
     "default_title": "__MSG_extName__",
     "default_popup": "popup/popup.html"

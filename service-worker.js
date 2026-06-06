@@ -127,8 +127,8 @@ chrome.runtime.onStartup.addListener(() => {
 // ^^^^^^^^^^ 遊覽器開啟觸發
 
 chrome.storage.onChanged.addListener((changes, areaName) => {
-  if((areaName === "autoScore" || areaName === "sync") && changes.autoScore) {
-    if(changes.autoScore.newValue.trigger) {
+  if(areaName === "sync" && changes.autoScore) {
+    if(changes.autoScore.newValue && changes.autoScore.newValue.trigger) {
       registerCountScoreContentScripts();
     } else {
       chrome.scripting
