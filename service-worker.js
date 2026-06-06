@@ -204,7 +204,7 @@ chrome.notifications.onClicked.addListener((notificationId) => {
 function injectAutoScript (tabId) {
   chrome.scripting.executeScript({
     target: { tabId },
-    files: ["content_scripts/giveaway-core.js", "content_scripts/autoStart.js"]
+    files: ["content_scripts/giveaway-core.js", "content_scripts/humanize.js", "content_scripts/autoStart.js"]
   });
 }
 
