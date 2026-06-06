@@ -169,3 +169,23 @@ test('passesMinimum (mode all) requires every checked type', () => {
     false  // no group column
   );
 });
+
+test('isDescriptionGated is true for a locked row that has a description button', () => {
+  const r = rows(loadFixture());
+  assert.strictEqual(GiveawayCore.isDescriptionGated(r[4]), true);   // Row E
+});
+
+test('isDescriptionGated is false for an unlocked row', () => {
+  const r = rows(loadFixture());
+  assert.strictEqual(GiveawayCore.isDescriptionGated(r[0]), false);  // Row A (not locked)
+});
+
+test('isDescriptionGated is false for a locked row with no description button', () => {
+  const r = rows(loadFixture());
+  assert.strictEqual(GiveawayCore.isDescriptionGated(r[1]), false);  // Row B (locked, no description)
+});
+
+test('isEnterable is true for a description-gated locked row', () => {
+  const r = rows(loadFixture());
+  assert.strictEqual(GiveawayCore.isEnterable(r[4]), true);          // Row E
+});

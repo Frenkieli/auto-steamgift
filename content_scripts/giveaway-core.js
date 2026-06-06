@@ -22,7 +22,14 @@
       if (row.classList.contains('is-faded')) return false;
       const insert = row.querySelector('.giveaway__quick-entry-btn--insert');
       if (!insert) return false;
-      return !insert.classList.contains('is-locked');
+      if (!insert.classList.contains('is-locked')) return true;
+      // A locked insert is still enterable if it is only gated behind "view description".
+      return GiveawayCore.isDescriptionGated(row);
+    },
+    isDescriptionGated(row) {
+      const insert = row.querySelector('.giveaway__quick-entry-btn--insert');
+      if (!insert || !insert.classList.contains('is-locked')) return false;
+      return !!row.querySelector('.giveaway__quick-entry-btn--description');
     },
     getScore(row) {
       const span = row.querySelector('span.auto_steam-score');
