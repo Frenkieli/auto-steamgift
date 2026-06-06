@@ -78,5 +78,10 @@
   "optPointFloor": { "message": "低於此點數就停止抽取", "description": "設定頁保留點數門檻" },
   "optData": { "message": "資料", "description": "設定頁資料區塊" },
   "optResetTotal": { "message": "重置累計加入", "description": "設定頁重置累計" },
-  "optResetDefault": { "message": "回復預設值", "description": "設定頁回復預設" }
+  "optResetDefault": { "message": "回復預設值", "description": "設定頁回復預設" },
+  "pointUpdatedNever": { "message": "尚未更新", "description": "點數從未更新" },
+  "pointUpdatedJustNow": { "message": "剛剛更新", "description": "點數剛剛更新" },
+  "pointUpdatedMinutes": { "message": "更新於 $N$ 分鐘前", "placeholders": { "n": { "content": "$1" } }, "description": "點數更新於 N 分鐘前" },
+  "pointUpdatedHours": { "message": "更新於 $N$ 小時前", "placeholders": { "n": { "content": "$1" } }, "description": "點數更新於 N 小時前" },
+  "pointUpdatedDays": { "message": "更新於 $N$ 天前", "placeholders": { "n": { "content": "$1" } }, "description": "點數更新於 N 天前" }
 }

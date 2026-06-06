@@ -57,3 +57,9 @@ h1 { font-size: 16px; margin-bottom: 10px; }
 
 .footer { text-align: center; margin-top: 12px; }
 .footer a { color: #2b6cb0; text-decoration: none; font-size: 13px; }
+
+.status-sub {
+  margin-top: 2px;
+  font-size: 11px;
+  opacity: 0.6;
+}

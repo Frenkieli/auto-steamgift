@@ -23,11 +23,29 @@ chrome.storage.sync.get(["totalEnterGiveaway"], function (config) {
   document.getElementById("totalSpan").innerText = config.totalEnterGiveaway || 0;
 });
 
-// fetch current SteamGifts points
-fetch('https://www.steamgifts.com/')
-  .then((res) => res.text())
-  .then((html) => {
-    const match = html.match(/<span class="nav__points">(\d+)<\/span>/);
-    document.getElementById("pointSpan").innerText = match ? match[1] : '—';
-  })
-  .catch(() => { document.getElementById("pointSpan").innerText = '—'; });
+// 顯示快取點數 + 更新時間；只在快取超過 6h 時才請 SW 去抓
+const pointSpan = document.getElementById("pointSpan");
+const pointUpdatedSpan = document.getElementById("pointUpdatedSpan");
+const i18n = (key, n) => (n === undefined
+  ? chrome.i18n.getMessage(key)
+  : chrome.i18n.getMessage(key, [String(n)]));
+
+function renderPoints(currentPoint, pointUpdatedAt) {
+  pointSpan.innerText = (currentPoint == null) ? '—' : String(currentPoint);
+  pointUpdatedSpan.innerText = window.RelativeTime.relativeUpdatedText(pointUpdatedAt || 0, Date.now(), i18n);
+}
+
+chrome.storage.local.get(["currentPoint", "pointUpdatedAt"], (cache) => {
+  renderPoints(cache.currentPoint, cache.pointUpdatedAt);
+});
+
+chrome.runtime.sendMessage({ type: "refreshPointsIfStale" });
+
+chrome.storage.onChanged.addListener((changes, area) => {
+  if (area !== "local") return;
+  if (changes.currentPoint || changes.pointUpdatedAt) {
+    chrome.storage.local.get(["currentPoint", "pointUpdatedAt"], (cache) => {
+      renderPoints(cache.currentPoint, cache.pointUpdatedAt);
+    });
+  }
+});

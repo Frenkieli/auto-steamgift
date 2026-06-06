@@ -78,5 +78,10 @@
   "optPointFloor": { "message": "Stop entering below this many points", "description": "options point floor" },
   "optData": { "message": "Data", "description": "options data section" },
   "optResetTotal": { "message": "Reset cumulative count", "description": "options reset total" },
-  "optResetDefault": { "message": "Restore defaults", "description": "options reset defaults" }
+  "optResetDefault": { "message": "Restore defaults", "description": "options reset defaults" },
+  "pointUpdatedNever": { "message": "Not updated yet", "description": "points never updated" },
+  "pointUpdatedJustNow": { "message": "Updated just now", "description": "points updated just now" },
+  "pointUpdatedMinutes": { "message": "Updated $N$ min ago", "placeholders": { "n": { "content": "$1" } }, "description": "points updated N minutes ago" },
+  "pointUpdatedHours": { "message": "Updated $N$ h ago", "placeholders": { "n": { "content": "$1" } }, "description": "points updated N hours ago" },
+  "pointUpdatedDays": { "message": "Updated $N$ d ago", "placeholders": { "n": { "content": "$1" } }, "description": "points updated N days ago" }
 }
