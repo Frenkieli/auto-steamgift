@@ -15,8 +15,8 @@ test('defaultSchema has new minimum/behaviour keys with correct defaults', () =>
 
 test('defaultSchema seeds humanizeConfig with canonical defaults', () => {
   assert.deepStrictEqual(schema.humanizeConfig, {
-    delayMedian: 13000, delaySigma: 0.6, delayMin: 6000, delayMax: 240000,
-    readWpm: 300, readBase: 1200, readMin: 1500, readMax: 15000,
+    delayMedian: 4000, delaySigma: 0.6, delayMin: 2000, delayMax: 30000,
+    readWpm: 1000, readBase: 200, readMin: 400, readMax: 1500,
     breakProb: 0.15, breakMin: 60000, breakMax: 300000,
     earlyStopProb: 0.1,
     capMin: 50, capMax: 58

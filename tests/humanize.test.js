@@ -23,8 +23,8 @@ test('resolveConfig clamps above-range values down to the upper bound', () => {
 });
 
 test('resolveConfig falls back to default for non-numeric/missing values', () => {
-  assert.strictEqual(Humanize.resolveConfig({ readWpm: 'abc' }).readWpm, 300);
-  assert.strictEqual(Humanize.resolveConfig({ delayMedian: null }).delayMedian, 13000);
+  assert.strictEqual(Humanize.resolveConfig({ readWpm: 'abc' }).readWpm, 1000);
+  assert.strictEqual(Humanize.resolveConfig({ delayMedian: null }).delayMedian, 4000);
 });
 
 test('resolveConfig normalizes inverted min/max pairs (max >= min)', () => {
@@ -36,17 +36,17 @@ test('resolveConfig normalizes inverted min/max pairs (max >= min)', () => {
 
 test('humanDelayMs hits the median when the gaussian is 0 (default cfg)', () => {
   // Box-Muller with u1=0.5, u2=0.25 -> 0 -> exp(ln(median)) = median
-  assert.strictEqual(Humanize.humanDelayMs({}, seqRng([0.5, 0.25])), 13000);
+  assert.strictEqual(Humanize.humanDelayMs({}, seqRng([0.5, 0.25])), 4000);
 });
 
 test('humanDelayMs respects a custom median', () => {
   assert.strictEqual(Humanize.humanDelayMs({ delayMedian: 30000 }, seqRng([0.5, 0.25])), 30000);
 });
 
-test('humanDelayMs always stays within default [6000, 240000]', () => {
+test('humanDelayMs always stays within default [2000, 30000]', () => {
   for (let i = 0; i < 2000; i++) {
     const d = Humanize.humanDelayMs();
-    assert.ok(d >= 6000 && d <= 240000, `out of range: ${d}`);
+    assert.ok(d >= 2000 && d <= 30000, `out of range: ${d}`);
   }
 });
 
@@ -57,16 +57,16 @@ test('readingDelayMs grows with description length', () => {
   assert.ok(Humanize.readingDelayMs(1000, {}, r) > Humanize.readingDelayMs(100, {}, r));
 });
 
-test('readingDelayMs is clamped to default [1500, 15000]', () => {
-  assert.ok(Humanize.readingDelayMs(0, {}, () => 0.5) >= 1500);
-  assert.ok(Humanize.readingDelayMs(1000000, {}, () => 0.5) <= 15000);
+test('readingDelayMs is clamped to default [400, 1500]', () => {
+  assert.ok(Humanize.readingDelayMs(0, {}, () => 0.5) >= 400);
+  assert.ok(Humanize.readingDelayMs(1000000, {}, () => 0.5) <= 1500);
 });
 
 test('readingDelayMs slower wpm yields a longer stay', () => {
-  // Use a short description so neither result clamps to readMax (15000):
-  // 150 chars = 30 words -> 150wpm ~13200ms, 600wpm ~4200ms.
+  // Use a short description + high wpm so neither result clamps to readMax (1500):
+  // 50 chars = 10 words -> 600wpm ~1200ms, 1000wpm ~800ms (readBase 200, variance 1.0).
   const r = () => 0.5;
-  assert.ok(Humanize.readingDelayMs(150, { readWpm: 150 }, r) > Humanize.readingDelayMs(150, { readWpm: 600 }, r));
+  assert.ok(Humanize.readingDelayMs(50, { readWpm: 600 }, r) > Humanize.readingDelayMs(50, { readWpm: 1000 }, r));
 });
 
 // ---- maybeBreakMs ----
