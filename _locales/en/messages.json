@@ -62,6 +62,7 @@
   "popLoginLost": { "message": "⚠ Not signed in. Please sign in to SteamGifts.", "description": "popup logged-out banner text" },
   "popRecheckLogin": { "message": "I've signed in — re-check", "description": "popup re-check login button" },
   "popRecheckLoginChecking": { "message": "Checking…", "description": "popup re-check in progress label" },
+  "popToday": { "message": "Entered today", "description": "popup entered-today count label" },
   "popPoints": { "message": "Current Points", "description": "popup current points label" },
   "popGoSteam": { "message": "Go to SteamGifts", "description": "popup go to steamgifts button" },
   "notifyFullAutoDone": { "message": "Auto-entered $COUNT$ wishlist giveaways", "placeholders": { "count": { "content": "$1" } }, "description": "full-auto done notification" },

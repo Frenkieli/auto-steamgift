@@ -91,3 +91,9 @@ h1 { font-size: 16px; margin-bottom: 10px; }
   border-radius: 4px;
   cursor: pointer;
 }
+
+.today-count {
+  font-size: 12px;
+  opacity: 0.7;
+  margin-bottom: 12px;
+}

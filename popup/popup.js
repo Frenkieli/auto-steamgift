@@ -27,12 +27,18 @@ function renderLoginBanner() {
   loginBanner.style.display = loggedOut ? "" : "none";
 }
 
-// 開啟 popup 時反映目前的抽取/登入狀態
-chrome.storage.local.get(["fullAutoRunning", "loggedIn"], (s) => {
+const todayCount = document.getElementById("todayCount");
+function renderTodayCount(count, cap) {
+  todayCount.textContent = `${count || 0} / ${cap == null ? "—" : cap}`;
+}
+
+// 開啟 popup 時反映目前的抽取/登入/今日計數狀態
+chrome.storage.local.get(["fullAutoRunning", "loggedIn", "autoJoinCount", "autoJoinCap"], (s) => {
   isRunning = !!s.fullAutoRunning;
   loggedOut = s.loggedIn === false;
   renderFullAutoBtn();
   renderLoginBanner();
+  renderTodayCount(s.autoJoinCount, s.autoJoinCap);
 });
 
 // 狀態變化即時更新
@@ -47,6 +53,9 @@ chrome.storage.onChanged.addListener((changes, area) => {
     loggedOut = changes.loggedIn.newValue === false;
     renderFullAutoBtn();
     renderLoginBanner();
+  }
+  if (changes.autoJoinCount || changes.autoJoinCap) {
+    chrome.storage.local.get(["autoJoinCount", "autoJoinCap"], (s) => renderTodayCount(s.autoJoinCount, s.autoJoinCap));
   }
 });
 
