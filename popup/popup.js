@@ -100,8 +100,9 @@ fullAutoBtn.addEventListener("click", () => {
     }
     chrome.storage.sync.set({ fullAutoWarned: true });
     chrome.runtime.sendMessage({ type: "fullAutoWishlist" });
-    isRunning = true;
-    renderFullAutoBtn(); // 立即回饋；保持 popup 開著
+    fullAutoArmed = false;
+    // loading 由 storage.onChanged 驅動（SW 真的開始才設 fullAutoRunning）；
+    // 避免 SW 因非活躍時段/額度用完提前返回時，按鈕卡在「抽取中…」
   });
 });
 
