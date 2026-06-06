@@ -106,5 +106,15 @@
   "agoJustNow": { "message": "剛剛", "description": "相對時間：剛剛" },
   "agoMinutes": { "message": "$N$ 分鐘前", "placeholders": { "n": { "content": "$1" } }, "description": "相對時間：N 分鐘前" },
   "agoHours": { "message": "$N$ 小時前", "placeholders": { "n": { "content": "$1" } }, "description": "相對時間：N 小時前" },
-  "agoDays": { "message": "$N$ 天前", "placeholders": { "n": { "content": "$1" } }, "description": "相對時間：N 天前" }
+  "agoDays": { "message": "$N$ 天前", "placeholders": { "n": { "content": "$1" } }, "description": "相對時間：N 天前" },
+  "kpiTotal": { "message": "累計抽獎", "description": "儀表板 KPI：累計抽獎數" },
+  "kpiToday": { "message": "今日 / 上限", "description": "儀表板 KPI：今日已抽/上限" },
+  "kpiPoints": { "message": "目前點數", "description": "儀表板 KPI：目前點數" },
+  "kpiSuccess": { "message": "成功率", "description": "儀表板 KPI：全期成功率" },
+  "recentTitle": { "message": "最近進入的 20 款遊戲", "description": "儀表板：最近抽獎清單標題" },
+  "recentHint": { "message": "點名稱可開啟抽獎頁", "description": "儀表板：清單提示" },
+  "recentEmpty": { "message": "尚無抽獎紀錄", "description": "儀表板：清單空狀態" },
+  "badgeSuccess": { "message": "成功", "description": "儀表板：成功徽章" },
+  "badgeFail": { "message": "失敗", "description": "儀表板：失敗徽章" },
+  "optSettings": { "message": "設定", "description": "設定區分隔標題" }
 }

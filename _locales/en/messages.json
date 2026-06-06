@@ -106,5 +106,15 @@
   "agoJustNow": { "message": "just now", "description": "relative time: just now" },
   "agoMinutes": { "message": "$N$ min ago", "placeholders": { "n": { "content": "$1" } }, "description": "relative time: N minutes ago" },
   "agoHours": { "message": "$N$ hr ago", "placeholders": { "n": { "content": "$1" } }, "description": "relative time: N hours ago" },
-  "agoDays": { "message": "$N$ days ago", "placeholders": { "n": { "content": "$1" } }, "description": "relative time: N days ago" }
+  "agoDays": { "message": "$N$ days ago", "placeholders": { "n": { "content": "$1" } }, "description": "relative time: N days ago" },
+  "kpiTotal": { "message": "Total entries", "description": "dashboard KPI: cumulative entries" },
+  "kpiToday": { "message": "Today / Cap", "description": "dashboard KPI: today vs cap" },
+  "kpiPoints": { "message": "Current points", "description": "dashboard KPI: current points" },
+  "kpiSuccess": { "message": "Success rate", "description": "dashboard KPI: lifetime success rate" },
+  "recentTitle": { "message": "Last 20 giveaways entered", "description": "dashboard: recent list title" },
+  "recentHint": { "message": "Click a name to open its giveaway", "description": "dashboard: list hint" },
+  "recentEmpty": { "message": "No entries yet", "description": "dashboard: empty list" },
+  "badgeSuccess": { "message": "Success", "description": "dashboard: success badge" },
+  "badgeFail": { "message": "Fail", "description": "dashboard: fail badge" },
+  "optSettings": { "message": "Settings", "description": "settings section divider" }
 }
