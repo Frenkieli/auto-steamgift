@@ -44,6 +44,7 @@ function loadHumanize(stored) {
   HUMANIZE_FIELDS.forEach((f) => {
     document.getElementById(f.id).value = hzToDisplay(hz[f.key], f.kind);
   });
+  document.getElementById("hz-readingEnabled").checked = hz.readingEnabled;
 }
 
 function saveHumanize() {
@@ -51,6 +52,7 @@ function saveHumanize() {
   HUMANIZE_FIELDS.forEach((f) => {
     obj[f.key] = hzToStored(document.getElementById(f.id).value, f.kind);
   });
+  obj.readingEnabled = document.getElementById("hz-readingEnabled").checked;
   chrome.storage.sync.set({ humanizeConfig: obj });
 }
 
@@ -152,6 +154,7 @@ document.getElementById("opt-aggressive").addEventListener("change", (e) =>
 HUMANIZE_FIELDS.forEach((f) => {
   document.getElementById(f.id).addEventListener("change", saveHumanize);
 });
+document.getElementById("hz-readingEnabled").addEventListener("change", saveHumanize);
 
 document.getElementById("resetTotal").addEventListener("click", () => {
   chrome.storage.sync.set({ totalEnterGiveaway: 0 });

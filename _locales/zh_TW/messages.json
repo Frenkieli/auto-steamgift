@@ -84,6 +84,7 @@
   "hzDelayMin": { "message": "間隔最短（秒）", "description": "間隔最短" },
   "hzDelayMax": { "message": "間隔最長（秒）", "description": "間隔最長" },
   "hzReadWpm": { "message": "閱讀速度（詞/分）", "description": "閱讀速度" },
+  "hzReadingEnabled": { "message": "保留閱讀時間（點開描述後停頓）", "description": "保留閱讀時間開關" },
   "hzBreakProb": { "message": "長休息機率（%）", "description": "長休息機率" },
   "hzEarlyStopProb": { "message": "提早收手機率（%）", "description": "提早收手機率" },
   "hzCapMin": { "message": "每日上限最小", "description": "每日上限最小" },

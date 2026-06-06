@@ -84,6 +84,7 @@
   "hzDelayMin": { "message": "Minimum gap (s)", "description": "humanize delay min" },
   "hzDelayMax": { "message": "Maximum gap (s)", "description": "humanize delay max" },
   "hzReadWpm": { "message": "Reading speed (words/min)", "description": "humanize reading wpm" },
+  "hzReadingEnabled": { "message": "Simulate reading the description", "description": "humanize reading enabled toggle" },
   "hzBreakProb": { "message": "Long-break chance (%)", "description": "humanize break probability" },
   "hzEarlyStopProb": { "message": "Early-stop chance (%)", "description": "humanize early stop probability" },
   "hzCapMin": { "message": "Daily cap minimum", "description": "humanize cap min" },
