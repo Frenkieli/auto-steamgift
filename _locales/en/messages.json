@@ -4,7 +4,7 @@
     "description": "extensions name"
   },
   "extDescription": {
-    "message": "Automatically add to the list according to each user-defined value score",
+    "message": "Manage SteamGifts wishlists with custom scores. Get point alerts and auto-organize with human-like pacing to reduce server load.",
     "description": "extensions description"
   },
   "popTitle": {
