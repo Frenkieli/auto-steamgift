@@ -1,5 +1,5 @@
 * { box-sizing: border-box; }
-body { font-family: system-ui, sans-serif; font-size: 14px; padding: 20px; max-width: 780px; }
+body { font-family: system-ui, sans-serif; font-size: 14px; padding: 24px 32px; max-width: 1200px; margin: 0 auto; }
 h1 { font-size: 20px; margin-bottom: 16px; }
 section { border: 1px solid #e2e2e2; border-radius: 8px; padding: 14px 16px; margin-bottom: 16px; }
 h2 { font-size: 15px; margin-bottom: 10px; }
@@ -36,11 +36,14 @@ button { padding: 8px 12px; margin-right: 8px; cursor: pointer; border: 1px soli
 /* Settings */
 .settings-divider { display: flex; align-items: center; gap: 10px; color: #9aa3b0; font-size: 12px; letter-spacing: .05em; text-transform: uppercase; margin: 8px 0 14px; }
 .settings-divider::before, .settings-divider::after { content: ""; flex: 1; height: 1px; background: #e2e6eb; }
-.settings-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.settings-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; align-items: start; }
 .settings-grid section { margin-bottom: 0; }
 .settings-grid .wide { grid-column: 1 / -1; }
+/* wide cards have room: flow numeric fields horizontally instead of one-per-line */
+.settings-grid .wide .field:not(.inline) { display: inline-flex; width: auto; margin-right: 24px; vertical-align: top; }
+.settings-grid .wide details { margin-top: 8px; }
 
-@media (max-width: 600px) {
+@media (max-width: 720px) {
   .kpis { grid-template-columns: repeat(2, 1fr); }
   .settings-grid { grid-template-columns: 1fr; }
 }
