@@ -48,8 +48,37 @@ chrome.storage.sync.get(["minScore", "minLevel", "requiredTypes", "pointFloor"],
       return false;
     });
 
-    // 3) 點擊 inline 的 quick-entry 按鈕後，輪詢該列是否變成 is-faded（代表抽取成功）
-    function enterGiveaway(row) {
+    // 若該列因「需先看說明」而 is-locked，點開 description 按鈕並等待解鎖
+    function unlockIfNeeded(row) {
+      return new Promise((resolve, reject) => {
+        const insertBtn = row.querySelector('.giveaway__quick-entry-btn--insert');
+        if (insertBtn && !insertBtn.classList.contains('is-locked')) {
+          resolve();
+          return;
+        }
+        const descBtn = row.querySelector('.giveaway__quick-entry-btn--description');
+        if (!insertBtn || !descBtn) {
+          reject(new Error('locked, no description'));
+          return;
+        }
+        descBtn.click();
+        let tries = 0;
+        const timer = setInterval(() => {
+          tries++;
+          if (!insertBtn.classList.contains('is-locked')) {
+            clearInterval(timer);
+            resolve();
+          } else if (tries > 12) {
+            clearInterval(timer);
+            reject(new Error('unlock timeout'));
+          }
+        }, 500);
+      });
+    }
+
+    // 3) 需要時先解鎖（看說明），再點擊 inline 的 quick-entry 按鈕，輪詢該列是否變成 is-faded（代表抽取成功）
+    async function enterGiveaway(row) {
+      await unlockIfNeeded(row);
       return new Promise((resolve, reject) => {
         const insertBtn = row.querySelector('.giveaway__quick-entry-btn--insert');
         if (!insertBtn || insertBtn.classList.contains('is-locked')) {
