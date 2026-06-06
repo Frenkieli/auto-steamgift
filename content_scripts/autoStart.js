@@ -1,5 +1,6 @@
 chrome.storage.sync.get(["minScore", "minLevel", "requiredTypes", "pointFloor"], function (cfg) {
   setTimeout(() => {
+    if (!document.querySelector('.nav__points')) return; // 未登入則不自動加入
     // 用來變更 giftCard 的組件 UI
     const CARD_TEXT = {
       Enter: '(Enter Giveaway)',
