@@ -189,3 +189,30 @@ test('isEnterable is true for a description-gated locked row', () => {
   const r = rows(loadFixture());
   assert.strictEqual(GiveawayCore.isEnterable(r[4]), true);          // Row E
 });
+
+test('getQuickEntryError returns the error text when the error div is present', () => {
+  const dom = new (require('jsdom').JSDOM)(
+    '<div class="giveaway__row-inner-wrap"><div class="giveaway__quick-entry-wrap">' +
+    '<div class="giveaway__quick-entry-error"><i class="fa fa-exclamation-circle"></i><span>Previously Won</span></div>' +
+    '</div></div>'
+  );
+  const row = dom.window.document.querySelector('.giveaway__row-inner-wrap');
+  assert.strictEqual(GiveawayCore.getQuickEntryError(row), 'Previously Won');
+});
+
+test('getQuickEntryError returns null when no error div exists', () => {
+  const r = rows(loadFixture());
+  assert.strictEqual(GiveawayCore.getQuickEntryError(r[0]), null); // Row A: normal enterable row
+});
+
+test('getGameId reads data-game-id from the outer row wrap', () => {
+  const r = rows(loadFixture());
+  assert.strictEqual(GiveawayCore.getGameId(r[0]), '111');  // Row A
+  assert.strictEqual(GiveawayCore.getGameId(r[3]), '444');  // Row D
+});
+
+test('getGameId returns null when there is no outer wrap', () => {
+  const dom = new (require('jsdom').JSDOM)('<div class="giveaway__row-inner-wrap"></div>');
+  const row = dom.window.document.querySelector('.giveaway__row-inner-wrap');
+  assert.strictEqual(GiveawayCore.getGameId(row), null);
+});

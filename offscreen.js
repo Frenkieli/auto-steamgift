@@ -5,7 +5,7 @@ const delay = (ms) => new Promise((r) => setTimeout(r, ms));
 
 chrome.runtime.onMessage.addListener((message) => {
   if (message.type !== "runFullAuto") return;
-  runFullAuto(message.cfg || {}, message.maxEntries || 0)
+  runFullAuto(message.cfg || {}, message.maxEntries || 0, message.wonCodes || [], message.wonGameIds || [])
     .then(({ count, point, loggedIn, entries }) => chrome.runtime.sendMessage({ type: "fullAutoResult", count, point, loggedIn, entries }))
     .catch(() => chrome.runtime.sendMessage({ type: "fullAutoResult", count: 0 }));
 });
@@ -30,7 +30,10 @@ async function postAjax(doValue, code, xsrf) {
 
 const enterOne = async (code, xsrf) => {
   const data = await postAjax("entry_insert", code, xsrf);
-  return !!data && data.type === "success";
+  return {
+    ok: !!data && data.type === "success",
+    msg: data && data.msg ? String(data.msg) : "",
+  };
 };
 
 // 點開描述（giveaway_description）並回傳描述文字長度，供閱讀停留計算
@@ -39,7 +42,9 @@ const fetchDescriptionLen = async (code, xsrf) => {
   return (data && data.html ? String(data.html) : "").length;
 };
 
-async function runFullAuto(cfg, maxEntries) {
+async function runFullAuto(cfg, maxEntries, wonCodes, wonGameIds) {
+  const wonSet = new Set(wonCodes || []);
+  const wonGameIdSet = new Set(wonGameIds || []);
   const human = window.Humanize;
   const hcfg = (cfg && cfg.humanizeConfig) || {};
   const res = await fetch(WISHLIST_URL, { credentials: "include" });
@@ -83,19 +88,25 @@ async function runFullAuto(cfg, maxEntries) {
     if (myPoint - cost < pointFloor) continue;
     const code = core.extractCode(row);
     if (!code) continue;
+    const gameId = core.getGameId(row);
+    if (wonSet.has(code) || (gameId && wonGameIdSet.has(gameId))) continue; // 已中獎：永不嘗試（同遊戲所有贈品都跳過）
     if (core.isDescriptionGated(row)) {
       const len = await fetchDescriptionLen(code, xsrf);
       await delay(human.readingDelayMs(len, hcfg)); // 閱讀停留（伺服器可觀測）
-    }
-    const ok = await enterOne(code, xsrf);
-    if (ok) {
-      myPoint -= cost;
-      count++;
     }
     const nameLink = row.querySelector('.giveaway__heading__name');
     const name = nameLink ? nameLink.textContent.trim() : "";
     const path = nameLink ? nameLink.getAttribute('href') : "";
     const url = path ? new URL(path, "https://www.steamgifts.com").href : "";
+    const { ok, msg } = await enterOne(code, xsrf);
+    if (ok) {
+      myPoint -= cost;
+      count++;
+    } else if (/previously won/i.test(msg)) {
+      wonSet.add(code);
+      if (gameId) wonGameIdSet.add(gameId);
+      chrome.runtime.sendMessage({ type: "recordPreviouslyWon", gameId, code, name, url, time: Date.now() });
+    }
     entries.push({ name, url, points: ok ? cost : 0, result: ok ? "success" : "fail", time: Date.now() });
     await delay(human.humanDelayMs(hcfg));
     const breakMs = human.maybeBreakMs(hcfg);

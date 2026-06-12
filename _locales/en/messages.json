@@ -116,5 +116,9 @@
   "recentEmpty": { "message": "No entries yet", "description": "dashboard: empty list" },
   "badgeSuccess": { "message": "Success", "description": "dashboard: success badge" },
   "badgeFail": { "message": "Fail", "description": "dashboard: fail badge" },
+  "wonTitle": { "message": "Previously won (never re-entered)", "description": "dashboard: previously-won list title" },
+  "wonEmpty": { "message": "No previously-won games recorded", "description": "dashboard: previously-won empty list" },
+  "wonClear": { "message": "Clear list", "description": "dashboard: clear previously-won list button" },
+  "badgeWon": { "message": "Won", "description": "dashboard: previously-won badge" },
   "optSettings": { "message": "Settings", "description": "settings section divider" }
 }

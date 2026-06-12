@@ -31,6 +31,16 @@
       if (!insert || !insert.classList.contains('is-locked')) return false;
       return !!row.querySelector('.giveaway__quick-entry-btn--description');
     },
+    getQuickEntryError(row) {
+      const el = row.querySelector('.giveaway__quick-entry-error');
+      if (!el) return null;
+      return (el.textContent || '').trim();
+    },
+    getGameId(row) {
+      const outer = row.closest('.giveaway__row-outer-wrap');
+      if (!outer) return null;
+      return outer.getAttribute('data-game-id') || null;
+    },
     getScore(row) {
       const span = row.querySelector('span.auto_steam-score');
       if (!span) return 0;

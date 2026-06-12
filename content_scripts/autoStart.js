@@ -21,7 +21,7 @@ chrome.storage.sync.get(
 
         // 每日預算（storage.local）：跨次/跨頁累計，到頂就停、隔天重置
         chrome.storage.local.get(
-          ["autoJoinDate", "autoJoinCount", "autoJoinCap"],
+          ["autoJoinDate", "autoJoinCount", "autoJoinCap", "previouslyWon"],
           function (budget) {
             const today = new Date().toLocaleDateString("en-CA"); // 本地 YYYY-MM-DD
             let autoJoinDate = budget.autoJoinDate;
@@ -40,11 +40,19 @@ chrome.storage.sync.get(
             let remaining = Math.max(0, autoJoinCap - autoJoinCount);
             if (remaining <= 0) return; // 今日額度用完
 
+            const wonCodes = new Set(
+              (budget.previouslyWon || []).map((e) => e && e.code).filter(Boolean),
+            );
+            const wonGameIds = new Set(
+              (budget.previouslyWon || []).map((e) => e && e.gameId).filter(Boolean),
+            );
+
             // 用來變更 giftCard 的組件 UI
             const CARD_TEXT = {
               Enter: "(Enter Giveaway)",
               Fail: "(Enter Giveaway Fail)",
               NotEnough: "(Not Enough Point)",
+              Won: "(Previously Won)",
             };
             const CARD_STATE = {
               Success: { textColor: "green", bgColor: "#0ff1" },
@@ -89,12 +97,25 @@ chrome.storage.sync.get(
 
             giftElements.sort((a, b) => core.getScore(b) - core.getScore(a));
 
+            // 已中獎的遊戲：標紅、永不嘗試（同一遊戲可能有多個贈品，依 gameId 擋下全部）
+            const notWonGiftElements = giftElements.filter((row) => {
+              const gid = core.getGameId(row);
+              const won = (gid && wonGameIds.has(gid)) || wonCodes.has(core.extractCode(row));
+              if (!won) return true;
+              giftCardUiChange({
+                cardElement: row,
+                text: CARD_TEXT.Won,
+                ...CARD_STATE.Fail,
+              });
+              return false;
+            });
+
             // 2) 依目前點數篩選，扣完不能低於保留點數門檻
             const pointsEl = document.querySelector(".nav__points");
             let myPoint = pointsEl ? Number(pointsEl.innerText) : 0;
             let countEntryGift = 0;
 
-            const readyToEnterGiftElements = giftElements.filter((row) => {
+            const readyToEnterGiftElements = notWonGiftElements.filter((row) => {
               const cost = core.parsePointCost(row) || 0;
               if (myPoint - cost >= pointFloor) {
                 myPoint -= cost;
@@ -171,7 +192,13 @@ chrome.storage.sync.get(
                 let tries = 0;
                 const timer = setInterval(() => {
                   tries++;
-                  if (row.classList.contains("is-faded")) {
+                  const errText = core.getQuickEntryError(row);
+                  if (errText && /previously won/i.test(errText)) {
+                    clearInterval(timer);
+                    const err = new Error("previously won");
+                    err.previouslyWon = true;
+                    reject(err);
+                  } else if (row.classList.contains("is-faded")) {
                     clearInterval(timer);
                     resolve();
                   } else if (insertBtn.classList.contains("is-locked")) {
@@ -193,6 +220,17 @@ chrome.storage.sync.get(
                 const gameName = nameLink ? nameLink.textContent.trim() : "";
                 const gameUrl = nameLink ? nameLink.href : "";
                 const gameCost = core.parsePointCost(row) || 0;
+                const gameCode = core.extractCode(row);
+                const gameId = core.getGameId(row);
+                // 同一輪稍早才偵測到已中獎的遊戲：後續同遊戲的贈品直接跳過不點
+                if ((gameId && wonGameIds.has(gameId)) || (gameCode && wonCodes.has(gameCode))) {
+                  giftCardUiChange({
+                    cardElement: row,
+                    text: CARD_TEXT.Won,
+                    ...CARD_STATE.Fail,
+                  });
+                  continue;
+                }
                 try {
                   await enterGiveaway(row);
                   countEntryGift++;
@@ -218,6 +256,18 @@ chrome.storage.sync.get(
                     ...CARD_STATE.Success,
                   });
                 } catch (e) {
+                  if (e && e.previouslyWon && (gameCode || gameId)) {
+                    if (gameCode) wonCodes.add(gameCode);
+                    if (gameId) wonGameIds.add(gameId);
+                    chrome.runtime.sendMessage({
+                      type: "recordPreviouslyWon",
+                      gameId: gameId,
+                      code: gameCode,
+                      name: gameName,
+                      url: gameUrl,
+                      time: Date.now(),
+                    });
+                  }
                   chrome.runtime.sendMessage({
                     type: "recordEntry",
                     name: gameName,
@@ -228,7 +278,7 @@ chrome.storage.sync.get(
                   });
                   giftCardUiChange({
                     cardElement: row,
-                    text: CARD_TEXT.Fail,
+                    text: e && e.previouslyWon ? CARD_TEXT.Won : CARD_TEXT.Fail,
                     ...CARD_STATE.Fail,
                   });
                 }

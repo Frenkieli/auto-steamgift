@@ -40,17 +40,55 @@ function renderRecent(list) {
   });
 }
 
+function renderWon(list) {
+  const box = document.getElementById("wonList");
+  document.getElementById("wonCount").textContent = `(${list.length})`;
+  box.textContent = "";
+  if (!list.length) {
+    const empty = document.createElement("div");
+    empty.className = "recent-empty";
+    empty.textContent = chrome.i18n.getMessage("wonEmpty");
+    box.appendChild(empty);
+    return;
+  }
+  list.forEach((e) => {
+    const row = document.createElement("div");
+    row.className = "recent-row won-row";
+
+    const badge = document.createElement("span");
+    badge.className = "badge fail";
+    badge.textContent = chrome.i18n.getMessage("badgeWon");
+
+    const name = document.createElement("a");
+    name.className = "recent-name";
+    name.textContent = e.name || e.code || "—"; // textContent: never trust page-derived names as HTML
+    if (e.url) { name.href = e.url; name.target = "_blank"; name.rel = "noreferrer"; }
+
+    const id = document.createElement("span");
+    id.className = "recent-id";
+    id.textContent = e.gameId ? `#${e.gameId}` : (e.code ? `#${e.code}` : "—");
+
+    const tm = document.createElement("span");
+    tm.className = "recent-tm";
+    tm.textContent = window.RelativeTime.relativeAgoText(e.time || 0, Date.now(), t);
+
+    row.append(badge, name, id, tm);
+    box.appendChild(row);
+  });
+}
+
 function renderDashboard() {
   chrome.storage.sync.get(["totalEnterGiveaway", "totalAttempts"], (s) => {
     document.getElementById("kpiTotal").textContent = (s.totalEnterGiveaway || 0).toLocaleString();
     const rate = window.EntryRecord.successRate(s.totalEnterGiveaway, s.totalAttempts);
     document.getElementById("kpiSuccess").textContent = rate == null ? "—" : `${rate}%`;
   });
-  chrome.storage.local.get(["currentPoint", "pointUpdatedAt", "autoJoinCount", "autoJoinCap", "recentEntries"], (s) => {
+  chrome.storage.local.get(["currentPoint", "pointUpdatedAt", "autoJoinCount", "autoJoinCap", "recentEntries", "previouslyWon"], (s) => {
     document.getElementById("kpiPoints").textContent = s.currentPoint == null ? "—" : String(s.currentPoint);
     document.getElementById("kpiPointsSub").textContent = window.RelativeTime.relativeUpdatedText(s.pointUpdatedAt || 0, Date.now(), t);
     document.getElementById("kpiToday").textContent = `${s.autoJoinCount || 0} / ${s.autoJoinCap == null ? "—" : s.autoJoinCap}`;
     renderRecent(s.recentEntries || []);
+    renderWon(s.previouslyWon || []);
   });
 }
 
@@ -217,11 +255,16 @@ document.getElementById("resetTotal").addEventListener("click", () => {
   chrome.storage.local.set({ recentEntries: [] }, renderDashboard);
 });
 
+document.getElementById("clearWon").addEventListener("click", (e) => {
+  e.preventDefault(); // 按鈕在 <summary> 內：阻止點擊順帶收合抽屜
+  chrome.storage.local.set({ previouslyWon: [] }, renderDashboard);
+});
+
 document.getElementById("resetDefault").addEventListener("click", () => {
   fetch(chrome.runtime.getURL("defaultSchema.json"))
     .then((res) => res.json())
     .then((data) => {
-      chrome.storage.local.set({ recentEntries: [] }); // local 不在 sync schema，需另外清
+      chrome.storage.local.set({ recentEntries: [], previouslyWon: [] }); // local 不在 sync schema，需另外清
       chrome.storage.sync.set(data, () => location.reload());
     })
     .catch((err) => console.error("restore defaults failed", err));
@@ -233,6 +276,6 @@ renderDashboard();
 // 即時反映抽獎/點數變化（safe & aggressive 模式都會寫這些 key）
 chrome.storage.onChanged.addListener((changes, area) => {
   const keys = Object.keys(changes);
-  const hit = ["recentEntries", "currentPoint", "pointUpdatedAt", "autoJoinCount", "autoJoinCap", "totalEnterGiveaway", "totalAttempts"];
+  const hit = ["recentEntries", "previouslyWon", "currentPoint", "pointUpdatedAt", "autoJoinCount", "autoJoinCap", "totalEnterGiveaway", "totalAttempts"];
   if (keys.some((k) => hit.includes(k))) renderDashboard();
 });

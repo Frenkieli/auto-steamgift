@@ -13,6 +13,19 @@
     return Math.round((s / a) * 100);
   }
 
-  root.EntryRecord = { pushRecentEntry, successRate };
-  if (typeof module !== 'undefined' && module.exports) module.exports = { pushRecentEntry, successRate };
+  // Previously-won skip list: newest first, uncapped. One entry per GAME: the same
+  // game often has several concurrent giveaways (different codes), so dedup by
+  // gameId first and fall back to the giveaway code for entries without one.
+  function pushWonEntry(list, entry) {
+    const base = Array.isArray(list) ? list : [];
+    const dup = base.some((e) => e && (
+      (entry.gameId && e.gameId === entry.gameId) ||
+      (entry.code && e.code === entry.code)
+    ));
+    if (dup) return base;
+    return [entry, ...base];
+  }
+
+  root.EntryRecord = { pushRecentEntry, successRate, pushWonEntry };
+  if (typeof module !== 'undefined' && module.exports) module.exports = { pushRecentEntry, successRate, pushWonEntry };
 })(typeof window !== 'undefined' ? window : globalThis);

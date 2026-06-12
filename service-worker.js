@@ -18,6 +18,13 @@ const recentList = self.SerialCounter.createSerialList(
   },
   (list, item) => self.EntryRecord.pushRecentEntry(list, item, 20)
 );
+const wonList = self.SerialCounter.createSerialList(
+  {
+    get: (key) => new Promise((res) => chrome.storage.local.get([key], (o) => res(o[key] || []))),
+    set: (key, value) => new Promise((res) => chrome.storage.local.set({ [key]: value }, res)),
+  },
+  (list, item) => self.EntryRecord.pushWonEntry(list, item)
+);
 
 let fullAutoRunning = false;
 
@@ -188,7 +195,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         // 同步搶佔旗標：兩則快速接連的訊息中，先到者在此回呼同步執行完才輪到後者，
         // 後者會看到旗標已為 true 而退出，杜絕並發。之後每條提早返回的路徑都要釋放。
         fullAutoRunning = true;
-        chrome.storage.local.get(["autoJoinDate", "autoJoinCount", "autoJoinCap"], (b) => {
+        chrome.storage.local.get(["autoJoinDate", "autoJoinCount", "autoJoinCap", "previouslyWon"], (b) => {
           const today = new Date().toLocaleDateString('en-CA');
           let count = 0;
           let cap;
@@ -203,7 +210,13 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
           if (remaining <= 0) { fullAutoRunning = false; return; } // 今日額度用完，釋放旗標
           chrome.storage.local.set({ fullAutoRunning: true }); // 供 popup 顯示 loading
           ensureOffscreen()
-            .then(() => chrome.runtime.sendMessage({ type: "runFullAuto", cfg, maxEntries: remaining }))
+            .then(() => chrome.runtime.sendMessage({
+              type: "runFullAuto",
+              cfg,
+              maxEntries: remaining,
+              wonCodes: (b.previouslyWon || []).map((e) => e && e.code).filter(Boolean),
+              wonGameIds: (b.previouslyWon || []).map((e) => e && e.gameId).filter(Boolean),
+            }))
             .catch(() => { fullAutoRunning = false; chrome.storage.local.set({ fullAutoRunning: false }); });
         });
       });
@@ -248,6 +261,17 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         url: message.url || "",
         points: message.points || 0,
         result: message.result,
+        time: message.time || Date.now(),
+      });
+      break;
+    }
+    case "recordPreviouslyWon": {
+      // 已中獎偵測：寫入 local 的 previouslyWon 跳過清單（SW 串行化、每個遊戲只存一筆）。
+      wonList.push("previouslyWon", {
+        gameId: message.gameId || "",
+        code: message.code || "",
+        name: message.name || "",
+        url: message.url || "",
         time: message.time || Date.now(),
       });
       break;

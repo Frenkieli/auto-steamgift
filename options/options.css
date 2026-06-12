@@ -32,6 +32,17 @@ button { padding: 8px 12px; margin-right: 8px; cursor: pointer; border: 1px soli
 .recent-pts { color: #7a6a3a; text-align: right; }
 .recent-tm { color: #9aa3b0; text-align: right; }
 .recent-empty { padding: 16px 14px; color: #9aa3b0; font-size: 13px; }
+.won { margin-top: 16px; }
+.won-row { grid-template-columns: 56px 1fr auto 84px; }
+.recent-id { color: #9aa3b0; font-size: 12px; text-align: right; }
+.recent-head button { padding: 3px 9px; font-size: 12px; margin: 0; }
+/* 抽屜：summary 當標題列，自畫展開箭頭（flex summary 不會顯示原生三角形） */
+summary.recent-head { cursor: pointer; user-select: none; list-style: none; }
+summary.recent-head::-webkit-details-marker { display: none; }
+.recent-head h2::before { content: "▾"; color: #9aa3b0; font-size: 11px; margin-right: 6px; }
+details:not([open]) > .recent-head h2::before { content: "▸"; }
+details:not([open]) > summary.recent-head { padding-bottom: 12px; }
+.recent-head .count { color: #9aa3b0; font-weight: 600; }
 
 /* Settings */
 .settings-divider { display: flex; align-items: center; gap: 10px; color: #9aa3b0; font-size: 12px; letter-spacing: .05em; text-transform: uppercase; margin: 8px 0 14px; }

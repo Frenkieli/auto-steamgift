@@ -17,13 +17,21 @@
       <div class="kpi"><div class="kpi-label">__MSG_kpiSuccess__</div><div class="kpi-value" id="kpiSuccess">—</div></div>
     </div>
 
-    <div class="recent">
-      <div class="recent-head">
+    <details class="recent">
+      <summary class="recent-head">
         <h2>__MSG_recentTitle__</h2>
         <span class="hint">__MSG_recentHint__</span>
-      </div>
+      </summary>
       <div class="recent-list" id="recentList"></div>
-    </div>
+    </details>
+
+    <details class="recent won">
+      <summary class="recent-head">
+        <h2>__MSG_wonTitle__ <span class="count" id="wonCount"></span></h2>
+        <button id="clearWon">__MSG_wonClear__</button>
+      </summary>
+      <div class="recent-list" id="wonList"></div>
+    </details>
   </div>
 
   <div class="settings-divider">__MSG_optSettings__</div>

@@ -116,5 +116,9 @@
   "recentEmpty": { "message": "尚無抽獎紀錄", "description": "儀表板：清單空狀態" },
   "badgeSuccess": { "message": "成功", "description": "儀表板：成功徽章" },
   "badgeFail": { "message": "失敗", "description": "儀表板：失敗徽章" },
+  "wonTitle": { "message": "已中獎遊戲（不再嘗試抽取）", "description": "儀表板：已中獎清單標題" },
+  "wonEmpty": { "message": "尚無已中獎紀錄", "description": "儀表板：已中獎清單空狀態" },
+  "wonClear": { "message": "清除清單", "description": "儀表板：清除已中獎清單按鈕" },
+  "badgeWon": { "message": "已中獎", "description": "儀表板：已中獎徽章" },
   "optSettings": { "message": "設定", "description": "設定區分隔標題" }
 }
